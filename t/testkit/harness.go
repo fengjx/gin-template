@@ -86,7 +86,7 @@ func NewHarness(t *testing.T) *Harness {
 		db.ResetForTest()
 		config.ResetForTest()
 		appEnv.ResetForTest()
-		appService.ResetOptionServiceForTest()
+		appService.ResetOptionForTest()
 		_ = os.Chdir(originalWD)
 	})
 
@@ -94,7 +94,7 @@ func NewHarness(t *testing.T) *Harness {
 	db.ResetForTest()
 	config.ResetForTest()
 	appEnv.ResetForTest()
-	appService.ResetOptionServiceForTest()
+	appService.ResetOptionForTest()
 
 	if err := os.Chdir(repoRoot); err != nil {
 		t.Fatalf("change directory to repo root: %v", err)
