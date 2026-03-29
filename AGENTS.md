@@ -70,10 +70,10 @@
 
 ## Execution Plan 约定
 
-- 本仓库不额外维护独立 `PLANS.md`
+- 新需求开始后，必须先从最新 `main` 创建/切换到本次迭代专用分支，再创建 `docs/features/<NNN>-<slug>/` 或开始任何代码、测试、文档写入
+- 本仓库不额外维护独立 `PLANS.md`, 角查看 `docs/playbooks/feature-lifecycle.md`
 - `docs/features/<NNN>-<slug>/` 就是 execution plan 与实现闭环的唯一载体
 - 任何非微小功能改动都必须创建 feature 目录
-- 新需求开始前，必须先同步本地 `main` 到远端最新状态，再开始新的迭代
 - 标准流程：`flow-idea -> flow-prd -> flow-spec -> flow-tasks -> flow-impl -> flow-test + flow-review -> flow-investigate(如有问题) -> flow-doc-release`
 - bugfix 快路径：`flow-investigate -> flow-spec -> flow-tasks -> flow-impl -> flow-test -> flow-review -> flow-doc-release`
 

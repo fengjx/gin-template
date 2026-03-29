@@ -8,11 +8,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/spf13/pflag"
+
 	"gin-template/internal/app/config"
 	"gin-template/internal/app/db"
 	appEnv "gin-template/internal/app/env"
 	sysoptionStore "gin-template/internal/store/sysoption"
-	"github.com/spf13/pflag"
 )
 
 type optionJSONValue struct {
@@ -21,7 +22,7 @@ type optionJSONValue struct {
 }
 
 func TestGetOptionStringAndJSON(t *testing.T) {
-	ResetOptionServiceForTest()
+	ResetOptionForTest()
 	db.ResetForTest()
 	config.ResetForTest()
 	appEnv.ResetForTest()
@@ -41,10 +42,6 @@ func TestGetOptionStringAndJSON(t *testing.T) {
 		IsPublic:    false,
 	}); err != nil {
 		t.Fatalf("create option: %v", err)
-	}
-
-	if err := RefreshOptions(context.Background()); err != nil {
-		t.Fatalf("refresh options: %v", err)
 	}
 
 	value, err := GetOptionString(context.Background(), "about")
@@ -70,7 +67,7 @@ func TestGetOptionStringAndJSON(t *testing.T) {
 }
 
 func TestUpdateOptionRefreshesCacheImmediately(t *testing.T) {
-	ResetOptionServiceForTest()
+	ResetOptionForTest()
 	db.ResetForTest()
 	config.ResetForTest()
 	appEnv.ResetForTest()
@@ -107,7 +104,7 @@ func TestUpdateOptionRefreshesCacheImmediately(t *testing.T) {
 	}
 }
 
-func TestOptionServiceAutoRefresh(t *testing.T) {
+func TestOptionAutoRefresh(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -118,15 +115,14 @@ func TestOptionServiceAutoRefresh(t *testing.T) {
 		}
 	)
 
-	svc := newOptionService(20 * time.Millisecond)
-	svc.loader = func(_ context.Context) ([]sysoptionStore.Model, error) {
+	svc := newOptionWithLoader(20*time.Millisecond, func(_ context.Context) ([]sysoptionStore.Model, error) {
 		mu.RLock()
 		defer mu.RUnlock()
 
 		cloned := make([]sysoptionStore.Model, len(items))
 		copy(cloned, items)
 		return cloned, nil
-	}
+	})
 
 	if err := svc.StartAutoRefresh(ctx); err != nil {
 		t.Fatalf("start auto refresh: %v", err)
@@ -158,12 +154,12 @@ func TestOptionServiceAutoRefresh(t *testing.T) {
 	t.Fatal("expected auto refresh to load updated value")
 }
 
-func TestNewOptionServiceDoesNotPreloadConfig(t *testing.T) {
-	ResetOptionServiceForTest()
+func TestNewOptionDoesNotPreloadConfig(t *testing.T) {
+	ResetOptionForTest()
 	config.ResetForTest()
 	appEnv.ResetForTest()
 
-	_ = newOptionService(time.Minute)
+	_ = newOption(time.Minute)
 
 	flags := pflag.NewFlagSet("config", pflag.ContinueOnError)
 	config.BindFlags(flags)
