@@ -7,8 +7,9 @@ import (
 	"strings"
 	"testing"
 
-	"gin-template/internal/middleware"
 	"github.com/gin-gonic/gin"
+
+	"gin-template/internal/middleware"
 )
 
 type noopServer struct{}
@@ -25,8 +26,12 @@ func (noopServer) GetFiles(c *gin.Context)                      { c.Status(http.
 func (noopServer) GetFilesSearch(c *gin.Context, _ GetFilesSearchParams) {
 	c.Status(http.StatusNoContent)
 }
-func (noopServer) PostFilesUpload(c *gin.Context)            { c.Status(http.StatusNoContent) }
-func (noopServer) DeleteFilesId(c *gin.Context, _ string)    { c.Status(http.StatusNoContent) }
+func (noopServer) PostFilesUpload(c *gin.Context) { c.Status(http.StatusNoContent) }
+
+//nolint:revive // 生成的 openapi 接口要求保持 DeleteFilesId 这种命名。
+func (noopServer) DeleteFilesId(c *gin.Context, _ string) { c.Status(http.StatusNoContent) }
+
+//nolint:revive // 生成的 openapi 接口要求保持 GetFilesId 这种命名。
 func (noopServer) GetFilesId(c *gin.Context, _ string)       { c.Status(http.StatusNoContent) }
 func (noopServer) GetOptions(c *gin.Context)                 { c.Status(http.StatusNoContent) }
 func (noopServer) PutOptions(c *gin.Context)                 { c.Status(http.StatusNoContent) }
@@ -40,9 +45,15 @@ func (noopServer) PutUsersMe(c *gin.Context)                 { c.Status(http.Sta
 func (noopServer) GetUsersSearch(c *gin.Context, _ GetUsersSearchParams) {
 	c.Status(http.StatusNoContent)
 }
+
+//nolint:revive // 生成的 openapi 接口要求保持 DeleteUsersId 这种命名。
 func (noopServer) DeleteUsersId(c *gin.Context, _ string) { c.Status(http.StatusNoContent) }
-func (noopServer) GetUsersId(c *gin.Context, _ string)    { c.Status(http.StatusNoContent) }
-func (noopServer) PutUsersId(c *gin.Context, _ string)    { c.Status(http.StatusNoContent) }
+
+//nolint:revive // 生成的 openapi 接口要求保持 GetUsersId 这种命名。
+func (noopServer) GetUsersId(c *gin.Context, _ string) { c.Status(http.StatusNoContent) }
+
+//nolint:revive // 生成的 openapi 接口要求保持 PutUsersId 这种命名。
+func (noopServer) PutUsersId(c *gin.Context, _ string) { c.Status(http.StatusNoContent) }
 
 func TestOpenAPIErrorHandlerReturnsProblem(t *testing.T) {
 	gin.SetMode(gin.TestMode)

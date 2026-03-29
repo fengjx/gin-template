@@ -21,7 +21,7 @@ func newServeCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:   "serve",
 		Short: "启动服务",
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			if err := config.Load(); err != nil {
 				return errs.Wrap(err, "加载配置失败")
 			}

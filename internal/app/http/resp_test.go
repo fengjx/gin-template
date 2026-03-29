@@ -68,7 +68,7 @@ func TestRecoveryReturnsUnifiedProblem(t *testing.T) {
 	if err != nil {
 		t.Fatalf("new engine: %v", err)
 	}
-	engine.GET("/panic-test", func(c *gin.Context) {
+	engine.GET("/panic-test", func(_ *gin.Context) {
 		panic("boom")
 	})
 

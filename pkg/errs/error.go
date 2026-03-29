@@ -33,7 +33,7 @@ func (w *withStack) Format(s fmt.State, verb rune) {
 		}
 		fallthrough
 	case 's':
-		io.WriteString(s, w.Error())
+		_, _ = io.WriteString(s, w.Error())
 	case 'q':
 		fmt.Fprintf(s, "%q", w.Error())
 	}

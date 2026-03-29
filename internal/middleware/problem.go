@@ -6,7 +6,7 @@ import (
 	"gin-template/internal/app/berr"
 )
 
-func abortProblem(c *gin.Context, status int, msg, detail string) {
+func abortProblem(c *gin.Context, status int, _ string, detail string) {
 	switch status {
 	case 429:
 		berr.Abort(c, berr.ErrTooManyRequests.WithDetail(detail))

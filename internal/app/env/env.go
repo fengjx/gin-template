@@ -70,7 +70,7 @@ func resolve() Environment {
 
 	flags := pflag.NewFlagSet("env", pflag.ContinueOnError)
 	flags.SetOutput(io.Discard)
-	flags.ParseErrorsWhitelist.UnknownFlags = true
+	flags.ParseErrorsAllowlist.UnknownFlags = true
 	flags.String("env", candidate, "运行环境")
 	if err := flags.Parse(argsProvider()); err == nil {
 		if value, getErr := flags.GetString("env"); getErr == nil {
