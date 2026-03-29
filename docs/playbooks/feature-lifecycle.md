@@ -6,6 +6,10 @@
 
 ## 流程
 
+开始新一轮需求前：
+
+`同步 main 最新状态 -> 创建/切换新分支 -> 创建 docs/features/<NNN>-<slug>/ -> 进入对应 skill 流程`
+
 标准 feature：
 
 `flow-idea -> flow-prd -> flow-spec -> flow-tasks -> flow-impl -> flow-test + flow-review -> flow-investigate(如有问题) -> flow-doc-release`
@@ -16,11 +20,14 @@ bugfix 快路径：
 
 ## 门禁
 
-1. 先创建 `docs/features/<NNN>-<slug>/`
-2. 更新 `feature.yaml.current_gate`
-3. 当前门禁未通过前，不进入下一 skill
-4. `flow-test` 或 `flow-review` 失败时，必须先写 `70-bug-log.md`
-5. `flow-doc-release` 未完成前，`feature.yaml.status` 不能是 `done`
+1. 新需求开始前，必须先同步本地 `main` 到远端最新状态，再开始新的 feature/bugfix 迭代
+2. 再创建 `docs/features/<NNN>-<slug>/`
+3. 更新 `feature.yaml.current_gate`
+4. 当前门禁未通过前，不进入下一 skill
+5. `flow-test` 或 `flow-review` 失败时，必须先写 `70-bug-log.md`
+6. `flow-doc-release` 未完成前，`feature.yaml.status` 不能是 `done`
+7. `flow-doc-release` 收尾时必须自动创建 PR，并将 PR 编号或链接写入 `80-release-doc.md`
+8. 若自动创建 PR 因 `GH_TOKEN`、权限或网络受阻，必须在 `80-release-doc.md` 记录阻塞原因，且不得结束 feature
 
 ## 文件职责
 
@@ -55,6 +62,7 @@ bugfix 快路径：
 
 ## 本地 GitHub 操作约定
 
+- 新需求开始前，优先执行一次 `main` 同步，确保新分支基于最新主线
 - 需要由本地 AI 或脚本创建 PR 时，优先从仓库根目录 `.env.local` 读取 `GH_TOKEN`
 - `GH_TOKEN` 必须使用短期、最小权限的 fine-grained token，并限制到当前仓库
 - `.env.local` 仅用于本地机器，不得提交到仓库

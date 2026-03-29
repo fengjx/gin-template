@@ -73,6 +73,7 @@
 - 本仓库不额外维护独立 `PLANS.md`
 - `docs/features/<NNN>-<slug>/` 就是 execution plan 与实现闭环的唯一载体
 - 任何非微小功能改动都必须创建 feature 目录
+- 新需求开始前，必须先同步本地 `main` 到远端最新状态，再开始新的迭代
 - 标准流程：`flow-idea -> flow-prd -> flow-spec -> flow-tasks -> flow-impl -> flow-test + flow-review -> flow-investigate(如有问题) -> flow-doc-release`
 - bugfix 快路径：`flow-investigate -> flow-spec -> flow-tasks -> flow-impl -> flow-test -> flow-review -> flow-doc-release`
 
@@ -85,10 +86,12 @@
 - 行为与 `docs/features/<NNN>-<slug>/20-tech-spec.md` 一致，没有未解释的规格漂移
 - `docs/code_review.md` 要求的 review 已完成，阻塞问题已关闭或显式记录残余风险
 - 文档与配置说明已同步到 `80-release-doc.md`
+- `flow-doc-release` 收尾后已自动创建 PR，或已明确记录阻塞原因且未宣告完成
 
 ## PR 交付要求
 
 - PR 必须包含对应的 `docs/features/<NNN>-<slug>/`
+- `flow-doc-release` 完成时必须自动提交 PR，并在 `80-release-doc.md` 记录 PR 编号或链接
 - PR 描述必须写清执行过的命令、review 结论、是否更新 `80-release-doc.md`
 - 如果改动影响 GitHub 工作流、CI、发布链路或外部集成，要在 PR 中单独说明风险
 - review 统一遵循 `docs/code_review.md`

@@ -42,6 +42,10 @@
 
 ## 生命周期
 
+开始新迭代前：
+
+`同步 main 最新状态 -> 创建/切换新分支 -> 创建 feature 目录 -> 进入对应流程`
+
 标准 feature 流程：
 
 `flow-idea -> flow-prd -> flow-spec -> flow-tasks -> flow-impl -> flow-test + flow-review -> flow-investigate(如有问题) -> flow-doc-release`
@@ -54,5 +58,7 @@ bugfix 快路径：
 
 - 先阅读 `AGENTS.md`
 - 再阅读 `docs/playbooks/feature-lifecycle.md`
+- 新需求开始前先同步本地 `main` 到远端最新状态
 - 然后从 `docs/features/_template/` 复制模板开始
 - 每一步只写当前 skill 负责的文件，不跳步，不混写
+- `flow-doc-release` 收尾时自动创建 PR，并把 PR 编号或链接补到 `80-release-doc.md`
