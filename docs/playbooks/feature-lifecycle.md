@@ -29,8 +29,9 @@ bugfix 快路径：
 5. 当前门禁未通过前，不进入下一 skill
 6. `flow-test` 或 `flow-review` 失败时，必须先写 `70-bug-log.md`
 7. `flow-doc-release` 未完成前，`feature.yaml.status` 不能是 `done`
-8. `flow-doc-release` 收尾时必须自动创建 PR，并将 PR 编号或链接写入 `80-release-doc.md`
-9. 若自动创建 PR 因 `GH_TOKEN`、权限或网络受阻，必须在 `80-release-doc.md` 记录阻塞原因，且不得结束 feature
+8. 执行 `flow-pr` 前，必须先和用户确认“当前工作已完成，可以提交 PR”；未得到确认前，不得自行提交、推送或创建 PR
+9. `flow-doc-release` 收尾时必须自动创建 PR，并将 PR 编号或链接写入 `80-release-doc.md`
+10. 若自动创建 PR 因 `GH_TOKEN`、权限或网络受阻，必须在 `80-release-doc.md` 记录阻塞原因，且不得结束 feature
 
 ## 文件职责
 
