@@ -12,9 +12,9 @@
 
 - 新增 `pkg/cache` 最小通用缓存组件，并重构 `option` 服务缓存实现。
 - 同步更新后端命名规范、feature 生命周期约束，并新增 `flow-pr` skill 规范提交与 PR 收尾流程。
-- PR：待创建
+- PR：[#8](https://github.com/fengjx/gin-template/pull/8)
 
 ## 合并前确认
 
-- [ ] feature.yaml.status 已更新为 `done`
-- [ ] feature.yaml.current_gate 已更新为 `done`
+- [x] feature.yaml.status 已更新为 `done`
+- [x] feature.yaml.current_gate 已更新为 `done`
