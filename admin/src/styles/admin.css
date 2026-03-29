@@ -1,0 +1,102 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+    --background: 186 40% 98%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 174 79% 30%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 190 26% 93%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 190 24% 95%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 188 53% 92%;
+    --accent-foreground: 222 47% 11%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 210 28% 88%;
+    --input: 210 28% 88%;
+    --ring: 174 79% 30%;
+    --sidebar: 220 45% 11%;
+    --sidebar-foreground: 210 40% 96%;
+    --sidebar-accent: 174 79% 30%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 215 28% 20%;
+    --radius: 1.25rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
+  body {
+    @apply font-sans text-foreground antialiased;
+    margin: 0;
+    background: radial-gradient(circle at top left, rgba(15, 118, 110, 0.18), transparent 24%),
+      radial-gradient(circle at top right, rgba(14, 165, 233, 0.16), transparent 26%),
+      linear-gradient(180deg, #f8fcfd 0%, #eef7f4 100%);
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+  }
+
+  ::selection {
+    background: rgba(13, 148, 136, 0.18);
+    color: #0f172a;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply border border-white/60 bg-white/80 shadow-soft backdrop-blur-xl;
+  }
+
+  .page-dots {
+    background-image: radial-gradient(rgba(15, 23, 42, 0.08) 1px, transparent 1px);
+    background-size: 18px 18px;
+    background-position: -9px -9px;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-pro-layout .ant-pro-global-header {
+    margin-inline: 12px;
+    border-radius: 18px;
+  }
+
+  .admin-avatar-name {
+    display: none;
+  }
+
+  .admin-brand-subtitle.ant-typography {
+    display: none;
+  }
+
+  .admin-hero-card .ant-pro-card-body,
+  .admin-panel-card .ant-pro-card-body,
+  .admin-stat-card .ant-pro-card-body {
+    padding: 20px;
+  }
+}

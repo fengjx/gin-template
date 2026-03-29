@@ -1,0 +1,17 @@
+run:
+  timeout: 5m
+  tests: true
+
+issues:
+  exclude-files:
+    - "internal/app/http/openapi.gen.go"
+
+linters:
+  enable:
+    - errcheck
+    - gocritic
+    - gosimple
+    - govet
+    - ineffassign
+    - revive
+    - staticcheck

@@ -1,0 +1,66 @@
+app:
+  name: gin-template
+  version: 0.1.0
+server:
+  host: 0.0.0.0
+  port: 3000
+  trusted_proxies: []
+  frontend_url: http://localhost:5173
+  cors_allow_origins:
+    - http://localhost:5173
+  pprof_enabled: true
+database:
+  driver: sqlite
+  dsn: ""
+  sqlite_path: runtime/data/app.db
+  schema_version: 2
+trace:
+  header_name: X-Trace-Id
+auth:
+  issuer: gin-template
+  access_token_ttl_minutes: 30
+  refresh_token_ttl_hours: 720
+  jwt_secret: change-me
+  cookie_domain: ""
+  secure_cookie: false
+  same_site: lax
+storage:
+  local_dir: runtime/uploads
+mail:
+  enabled: false
+  from_name: gin-template
+  from_email: no-reply@example.com
+  smtp_host: ""
+  smtp_port: 587
+  username: ""
+  password: ""
+oauth:
+  github:
+    enabled: false
+    client_id: ""
+    client_secret: ""
+    redirect_url: http://localhost:3000/api/v1/auth/oauth/github/callback
+  wechat:
+    enabled: false
+    app_id: ""
+    app_secret: ""
+    redirect_url: http://localhost:3000/api/v1/auth/oauth/wechat/callback
+turnstile:
+  enabled: false
+  secret_key: ""
+docs:
+  enabled: true
+openapi:
+  validate_on_boot: true
+feature: {}
+rate_limit:
+  enabled: true
+  global:
+    requests: 120
+    window_seconds: 60
+  critical:
+    requests: 10
+    window_seconds: 300
+  upload:
+    requests: 30
+    window_seconds: 300

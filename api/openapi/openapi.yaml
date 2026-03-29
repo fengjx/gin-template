@@ -1,0 +1,617 @@
+openapi: 3.1.0
+info:
+  title: gin-template API
+  version: 0.1.0
+servers:
+  - url: /api/v1
+components:
+  responses:
+    ProblemResponse:
+      description: Problem
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Problem' }
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    ApiResponseBase:
+      type: object
+      required: [status, msg]
+      properties:
+        status: { type: integer, description: 0 表示成功；100000-199999 为系统级状态码；200000-299999 为业务级状态码，按 biz 模块分段 }
+        msg: { type: string }
+    Problem:
+      type: object
+      required: [status, msg, details, data]
+      properties:
+        status: { type: integer }
+        msg: { type: string }
+        details: { type: string }
+        data:
+          nullable: true
+    User:
+      type: object
+      required: [uid, username, email, display_name, role, status, email_verified, ctime, utime]
+      properties:
+        uid: { type: integer, format: int64 }
+        username: { type: string }
+        email: { type: string }
+        display_name: { type: string }
+        role: { type: string }
+        status: { type: string }
+        email_verified: { type: boolean }
+        ctime: { type: integer, format: int64, description: Unix 秒级时间戳 }
+        utime: { type: integer, format: int64, description: Unix 秒级时间戳 }
+    AuthResponse:
+      type: object
+      required: [access_token, expires_at, user]
+      properties:
+        access_token: { type: string }
+        expires_at: { type: integer, format: int64, description: Unix 秒级时间戳 }
+        user: { $ref: '#/components/schemas/User' }
+    AuthEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          required: [data]
+          properties:
+            data: { $ref: '#/components/schemas/AuthResponse' }
+    LoginRequest:
+      type: object
+      required: [identifier, password]
+      properties:
+        identifier: { type: string }
+        password: { type: string }
+    RegisterRequest:
+      type: object
+      required: [username, email, password]
+      properties:
+        username: { type: string }
+        email: { type: string, format: email }
+        password: { type: string }
+        display_name: { type: string }
+        turnstile_token: { type: string }
+    UserCreateRequest:
+      type: object
+      required: [username, email, password]
+      properties:
+        username: { type: string }
+        email: { type: string, format: email }
+        password: { type: string }
+        display_name: { type: string }
+        role: { type: string }
+        status: { type: string }
+        email_verified: { type: boolean }
+    UserUpdateRequest:
+      type: object
+      properties:
+        email: { type: string, format: email }
+        password: { type: string }
+        display_name: { type: string }
+        role: { type: string }
+        status: { type: string }
+        email_verified: { type: boolean }
+    MessageResponse:
+      type: object
+      required: [message]
+      properties:
+        message: { type: string }
+        debug_token: { type: string }
+    MessageEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          required: [data]
+          properties:
+            data: { $ref: '#/components/schemas/MessageResponse' }
+    TokenRequest:
+      type: object
+      required: [token]
+      properties:
+        token: { type: string }
+        new_password: { type: string }
+        email: { type: string, format: email }
+        turnstile_token: { type: string }
+    UserListResponse:
+      type: object
+      required: [items, total]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/User' }
+        total: { type: integer }
+    UserEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          required: [data]
+          properties:
+            data: { $ref: '#/components/schemas/User' }
+    UserListEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          required: [data]
+          properties:
+            data: { $ref: '#/components/schemas/UserListResponse' }
+    File:
+      type: object
+      required: [id, uid, original_name, storage_name, content_type, size, path, ctime, utime]
+      properties:
+        id: { type: string }
+        uid: { type: integer, format: int64 }
+        original_name: { type: string }
+        storage_name: { type: string }
+        content_type: { type: string }
+        size: { type: integer }
+        path: { type: string }
+        ctime: { type: integer, format: int64, description: Unix 秒级时间戳 }
+        utime: { type: integer, format: int64, description: Unix 秒级时间戳 }
+    FileListResponse:
+      type: object
+      required: [items, total]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/File' }
+        total: { type: integer }
+    FileEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          required: [data]
+          properties:
+            data: { $ref: '#/components/schemas/File' }
+    FileListEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          required: [data]
+          properties:
+            data: { $ref: '#/components/schemas/FileListResponse' }
+    Option:
+      type: object
+      required: [id, option_key, option_value, description, is_public, ctime, utime]
+      properties:
+        id: { type: string }
+        option_key: { type: string }
+        option_value: { type: string }
+        description: { type: string }
+        is_public: { type: boolean }
+        ctime: { type: integer, format: int64, description: Unix 秒级时间戳 }
+        utime: { type: integer, format: int64, description: Unix 秒级时间戳 }
+    OptionListEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          required: [data]
+          properties:
+            data:
+              type: array
+              items: { $ref: '#/components/schemas/Option' }
+    OptionEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          required: [data]
+          properties:
+            data: { $ref: '#/components/schemas/Option' }
+    SystemStatusResponse:
+      type: object
+      required: [status]
+      properties:
+        status: { type: string }
+    SystemStatusEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          required: [data]
+          properties:
+            data: { $ref: '#/components/schemas/SystemStatusResponse' }
+    OptionValueResponse:
+      type: object
+      required: [value]
+      properties:
+        value: { type: string }
+    OptionValueEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          required: [data]
+          properties:
+            data: { $ref: '#/components/schemas/OptionValueResponse' }
+paths:
+  /auth/register:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RegisterRequest' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthEnvelope' }
+        default:
+          $ref: '#/components/responses/ProblemResponse'
+  /auth/login:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginRequest' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthEnvelope' }
+        default:
+          $ref: '#/components/responses/ProblemResponse'
+  /auth/logout:
+    post:
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageEnvelope' }
+        default:
+          $ref: '#/components/responses/ProblemResponse'
+  /auth/refresh:
+    post:
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthEnvelope' }
+        default:
+          $ref: '#/components/responses/ProblemResponse'
+  /auth/password/request-reset:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TokenRequest' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageEnvelope' }
+        default:
+          $ref: '#/components/responses/ProblemResponse'
+  /auth/password/reset:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TokenRequest' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageEnvelope' }
+        default:
+          $ref: '#/components/responses/ProblemResponse'
+  /auth/email/send-verification:
+    post:
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageEnvelope' }
+        default:
+          $ref: '#/components/responses/ProblemResponse'
+  /auth/email/verify:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TokenRequest' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageEnvelope' }
+        default:
+          $ref: '#/components/responses/ProblemResponse'
+  /users/me:
+    get:
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UserEnvelope' }
+        default:
+          $ref: '#/components/responses/ProblemResponse'
+    put:
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                display_name: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UserEnvelope' }
+        default:
+          $ref: '#/components/responses/ProblemResponse'
+  /users:
+    get:
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer }
+        - in: query
+          name: page_size
+          schema: { type: integer }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UserListEnvelope' }
+        default:
+          $ref: '#/components/responses/ProblemResponse'
+    post:
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UserCreateRequest' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UserEnvelope' }
+        default:
+          $ref: '#/components/responses/ProblemResponse'
+  /users/search:
+    get:
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: q
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UserListEnvelope' }
+        default:
+          $ref: '#/components/responses/ProblemResponse'
+  /users/{id}:
+    get:
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UserEnvelope' }
+        default:
+          $ref: '#/components/responses/ProblemResponse'
+    put:
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UserUpdateRequest' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UserEnvelope' }
+        default:
+          $ref: '#/components/responses/ProblemResponse'
+    delete:
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageEnvelope' }
+        default:
+          $ref: '#/components/responses/ProblemResponse'
+  /files:
+    get:
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FileListEnvelope' }
+        default:
+          $ref: '#/components/responses/ProblemResponse'
+  /files/search:
+    get:
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: q
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FileListEnvelope' }
+        default:
+          $ref: '#/components/responses/ProblemResponse'
+  /files/{id}:
+    get:
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FileEnvelope' }
+        default:
+          $ref: '#/components/responses/ProblemResponse'
+    delete:
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageEnvelope' }
+        default:
+          $ref: '#/components/responses/ProblemResponse'
+  /files/upload:
+    post:
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FileEnvelope' }
+        default:
+          $ref: '#/components/responses/ProblemResponse'
+  /options:
+    get:
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/OptionListEnvelope' }
+        default:
+          $ref: '#/components/responses/ProblemResponse'
+    put:
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [key, value]
+              properties:
+                key: { type: string }
+                value: { type: string }
+                description: { type: string }
+                is_public: { type: boolean }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/OptionEnvelope' }
+        default:
+          $ref: '#/components/responses/ProblemResponse'
+  /system/status:
+    get:
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SystemStatusEnvelope' }
+        default:
+          $ref: '#/components/responses/ProblemResponse'
+  /system/about:
+    get:
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/OptionValueEnvelope' }
+        default:
+          $ref: '#/components/responses/ProblemResponse'
+  /system/notice:
+    get:
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/OptionValueEnvelope' }
+        default:
+          $ref: '#/components/responses/ProblemResponse'

@@ -1,0 +1,60 @@
+# Repository-level Codex defaults for this project.
+
+profile = "default"
+project_doc_max_bytes = 65536
+web_search = "cached"
+
+[profiles]
+
+[profiles.default]
+model = "gpt-5.4"
+model_provider = "openai"
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+model_reasoning_effort = "medium"
+plan_mode_reasoning_effort = "high"
+model_reasoning_summary = "auto"
+model_verbosity = "medium"
+personality = "pragmatic"
+
+[profiles.review]
+model = "gpt-5.4"
+model_provider = "openai"
+approval_policy = "on-request"
+sandbox_mode = "read-only"
+model_reasoning_effort = "high"
+plan_mode_reasoning_effort = "high"
+model_reasoning_summary = "auto"
+model_verbosity = "medium"
+personality = "pragmatic"
+
+[profiles.bugfix]
+model = "gpt-5.4"
+model_provider = "openai"
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+model_reasoning_effort = "high"
+plan_mode_reasoning_effort = "high"
+model_reasoning_summary = "auto"
+model_verbosity = "medium"
+personality = "pragmatic"
+
+[sandbox_workspace_write]
+writable_roots = []
+network_access = false
+
+[mcp_servers]
+
+[mcp_servers.github]
+enabled = false
+url = "https://github.example.com/mcp"
+bearer_token_env_var = "GITHUB_TOKEN"
+startup_timeout_sec = 10.0
+tool_timeout_sec = 60.0
+
+[mcp_servers.ci]
+enabled = false
+url = "https://ci.example.com/mcp"
+bearer_token_env_var = "CI_MCP_TOKEN"
+startup_timeout_sec = 10.0
+tool_timeout_sec = 60.0

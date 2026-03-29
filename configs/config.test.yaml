@@ -1,0 +1,4 @@
+auth:
+  secure_cookie: false
+server:
+  pprof_enabled: true

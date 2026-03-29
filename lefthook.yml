@@ -1,0 +1,15 @@
+pre-commit:
+  parallel: false
+  commands:
+    go-vet:
+      run: go vet ./...
+    admin-lint:
+      run: cd admin && npm run lint
+    verify-generated:
+      run: make verify
+
+pre-push:
+  parallel: false
+  commands:
+    tests:
+      run: make test

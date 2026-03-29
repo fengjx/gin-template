@@ -1,0 +1,179 @@
+package service
+
+import (
+	"context"
+	"errors"
+	"path/filepath"
+	"sync"
+	"testing"
+	"time"
+
+	"gin-template/internal/app/config"
+	"gin-template/internal/app/db"
+	appEnv "gin-template/internal/app/env"
+	sysoptionStore "gin-template/internal/store/sysoption"
+	"github.com/spf13/pflag"
+)
+
+type optionJSONValue struct {
+	Name   string `json:"name"`
+	Enable bool   `json:"enable"`
+}
+
+func TestGetOptionStringAndJSON(t *testing.T) {
+	ResetOptionServiceForTest()
+	db.ResetForTest()
+	config.ResetForTest()
+	appEnv.ResetForTest()
+
+	t.Setenv("APP_DATABASE_SQLITE_PATH", filepath.Join(t.TempDir(), "option-service.db"))
+	if err := config.Load(); err != nil {
+		t.Fatalf("load config: %v", err)
+	}
+
+	_ = db.Get()
+
+	if err := sysoptionStore.Create(context.Background(), &sysoptionStore.Model{
+		ID:          "site_profile",
+		OptionKey:   "site_profile",
+		OptionValue: `{"name":"gin-template","enable":true}`,
+		Description: "站点配置",
+		IsPublic:    false,
+	}); err != nil {
+		t.Fatalf("create option: %v", err)
+	}
+
+	if err := RefreshOptions(context.Background()); err != nil {
+		t.Fatalf("refresh options: %v", err)
+	}
+
+	value, err := GetOptionString(context.Background(), "about")
+	if err != nil {
+		t.Fatalf("get option string: %v", err)
+	}
+	if value == "" {
+		t.Fatal("expected about option value, got empty string")
+	}
+
+	profile, err := GetOptionJSON[optionJSONValue](context.Background(), "site_profile")
+	if err != nil {
+		t.Fatalf("get option json: %v", err)
+	}
+	if profile.Name != "gin-template" || !profile.Enable {
+		t.Fatalf("unexpected json value: %+v", profile)
+	}
+
+	_, err = GetOptionString(context.Background(), "missing_key")
+	if !errors.Is(err, errOptionNotFound) {
+		t.Fatalf("expected errOptionNotFound, got %v", err)
+	}
+}
+
+func TestUpdateOptionRefreshesCacheImmediately(t *testing.T) {
+	ResetOptionServiceForTest()
+	db.ResetForTest()
+	config.ResetForTest()
+	appEnv.ResetForTest()
+
+	t.Setenv("APP_DATABASE_SQLITE_PATH", filepath.Join(t.TempDir(), "option-update.db"))
+	if err := config.Load(); err != nil {
+		t.Fatalf("load config: %v", err)
+	}
+
+	_ = db.Get()
+
+	if err := RefreshOptions(context.Background()); err != nil {
+		t.Fatalf("refresh options: %v", err)
+	}
+
+	item, err := UpdateOption(context.Background(), "about", UpdateOptionRequest{
+		Value:       "新的关于信息",
+		Description: "关于信息",
+		IsPublic:    true,
+	})
+	if err != nil {
+		t.Fatalf("update option: %v", err)
+	}
+	if item.OptionValue != "新的关于信息" {
+		t.Fatalf("expected updated item value, got %s", item.OptionValue)
+	}
+
+	value, err := GetOptionString(context.Background(), "about")
+	if err != nil {
+		t.Fatalf("get option string after update: %v", err)
+	}
+	if value != "新的关于信息" {
+		t.Fatalf("expected refreshed cache value, got %s", value)
+	}
+}
+
+func TestOptionServiceAutoRefresh(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	var (
+		mu    sync.RWMutex
+		items = []sysoptionStore.Model{
+			{OptionKey: "notice", OptionValue: "old"},
+		}
+	)
+
+	svc := newOptionService(20 * time.Millisecond)
+	svc.loader = func(_ context.Context) ([]sysoptionStore.Model, error) {
+		mu.RLock()
+		defer mu.RUnlock()
+
+		cloned := make([]sysoptionStore.Model, len(items))
+		copy(cloned, items)
+		return cloned, nil
+	}
+
+	if err := svc.StartAutoRefresh(ctx); err != nil {
+		t.Fatalf("start auto refresh: %v", err)
+	}
+
+	initial, err := svc.GetString(context.Background(), "notice")
+	if err != nil {
+		t.Fatalf("get initial value: %v", err)
+	}
+	if initial != "old" {
+		t.Fatalf("expected initial value old, got %s", initial)
+	}
+
+	mu.Lock()
+	items = []sysoptionStore.Model{
+		{OptionKey: "notice", OptionValue: "new"},
+	}
+	mu.Unlock()
+
+	deadline := time.Now().Add(400 * time.Millisecond)
+	for time.Now().Before(deadline) {
+		current, currentErr := svc.GetString(context.Background(), "notice")
+		if currentErr == nil && current == "new" {
+			return
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+
+	t.Fatal("expected auto refresh to load updated value")
+}
+
+func TestNewOptionServiceDoesNotPreloadConfig(t *testing.T) {
+	ResetOptionServiceForTest()
+	config.ResetForTest()
+	appEnv.ResetForTest()
+
+	_ = newOptionService(time.Minute)
+
+	flags := pflag.NewFlagSet("config", pflag.ContinueOnError)
+	config.BindFlags(flags)
+	if err := flags.Parse([]string{"--port", "4200"}); err != nil {
+		t.Fatalf("parse flags: %v", err)
+	}
+	if err := config.Load(); err != nil {
+		t.Fatalf("load config: %v", err)
+	}
+	if got := config.Get().Server.Port; got != 4200 {
+		t.Fatalf("expected port 4200 after option service construction, got %d", got)
+	}
+}

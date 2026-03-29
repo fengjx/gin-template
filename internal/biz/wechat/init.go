@@ -1,0 +1,3 @@
+package wechat
+
+func init() {}

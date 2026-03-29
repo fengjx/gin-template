@@ -16,9 +16,20 @@
 coverage.*
 *.coverprofile
 profile.cov
+.DS_Store
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+
+node_modules/
+web/node_modules/
+web/dist/assets/
+web/tsconfig.tsbuildinfo
+admin/tsconfig.tsbuildinfo
+runtime/
+.cache/
+logs
+bin
 
 # Go workspace file
 go.work
@@ -26,7 +37,11 @@ go.work.sum
 
 # env file
 .env
+.env.local
+.env.*.local
+configs/config.local.yaml
 
 # Editor/IDE
-# .idea/
-# .vscode/
+.idea/
+.vscode/
+.zed/

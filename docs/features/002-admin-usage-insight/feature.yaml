@@ -1,0 +1,10 @@
+id: 002
+slug: admin-usage-insight
+title: 新增后台使用情况洞察页
+type: feature
+status: done
+branch: codex/002-admin-usage-insight
+owner: ai-workflow-dry-run
+created_at: "2026-03-25"
+updated_at: "2026-03-25"
+current_gate: done
