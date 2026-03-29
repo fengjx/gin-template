@@ -5,6 +5,7 @@
 - 已修复后端 `backend-lint` 的静态检查问题，包括 `io.WriteString` 返回值处理、未使用参数、过时 `pflag` API、测试辅助代码的 `gocritic`/`unused` 告警。
 - 已修复前端 `frontend-check` 的 `Biome` 格式漂移，包括 import 顺序、换行与长表达式排版。
 - 已将 `golangci-lint` 升级到支持 Go 1.25 的 v2.6.2，并把 `.golangci.yml` 迁移到 v2 配置格式，消除 GitHub Actions 上的工具版本不兼容。
+- 已修复后续 CI 回归：`golangci-lint-action@v6` 升级到 `@v7`，并将 `openapi generate` 显式固定到 `oapi-codegen@v2.5.0`，避免生成物漂移。
 - 已完成 `make verify` 与 `make check` 回归。
 
 ## 修改范围

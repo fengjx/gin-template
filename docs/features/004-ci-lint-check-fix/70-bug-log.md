@@ -22,6 +22,16 @@
 - 修复建议：将 CI 和本地安装入口同时升级到支持 Go 1.25 的 `golangci-lint v2.6.2`，并将配置文件迁移到 v2 格式。
 - 回归验证点：新的 `./bin/golangci-lint run ./...`、`make lint`、`make check` 通过，PR 中 `backend-lint` 重新变绿。
 
+### BUG-4
+
+- 症状：升级到 `golangci-lint v2.6.2` 后，PR 的 `backend-lint` 仍失败，报错 `golangci-lint v2 is not supported by golangci-lint-action v6, you must update to golangci-lint-action v7`；同时 `generate-check` 失败，CI 中生成的 `internal/app/http/openapi.gen.go` 与仓库提交不一致。
+- 复现步骤：查看 `backend-lint` 的 [job 69046940143](https://github.com/fengjx/gin-template/actions/runs/23701800575/job/69046940143) 和 `generate-check` 的 [job 69046940149](https://github.com/fengjx/gin-template/actions/runs/23701800575/job/69046940149) 日志。
+- 影响范围：PR #6 无法通过所有必需检查。
+- 假设与排查过程：先读取 check-run annotations 确认 `backend-lint` 失败不是 lint finding，而是 action major 版本不支持 v2；再读取 `generate-check` 日志，确认 `go run github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen` 在 CI 中解析到了 `v2.6.0`，与仓库生成文件基于 `v2.5.0` 的结果不一致。
+- 根因：工具链升级后只改了 `golangci-lint` 版本，没有同步升级 `golangci-lint-action` major 版本；`openapi generate` 命令没有显式固定 `oapi-codegen` 版本。
+- 修复建议：将 `golangci/golangci-lint-action` 升级到 `@v7`，并在 `openapi generate` 中显式使用 `github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@v2.5.0`。
+- 回归验证点：`make verify` 本地无生成漂移，PR 中 `backend-lint` 与 `generate-check` 重新通过。
+
 ### BUG-2
 
 - 症状：`frontend-check` 在 GitHub CI 中失败，本地复现为 `Biome` 对 import 顺序与格式输出不一致。

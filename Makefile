@@ -10,6 +10,7 @@ dev:
 setup:
 	env $(GO_TOOL_ENV) go mod tidy
 	env $(GO_TOOL_ENV) GOBIN=$(LOCAL_BIN) go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.6.2
+	env $(GO_TOOL_ENV) GOBIN=$(LOCAL_BIN) go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@v2.5.0
 	cd admin && npm install
 	@if command -v lefthook >/dev/null 2>&1; then lefthook install; else echo "skip lefthook install (command not found)"; fi
 

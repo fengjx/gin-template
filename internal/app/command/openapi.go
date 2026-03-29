@@ -3,6 +3,7 @@ package command
 import (
 	"os"
 	"os/exec"
+	"path/filepath"
 
 	appOpenAPI "gin-template/internal/app/openapi"
 	"gin-template/pkg/errs"
@@ -29,7 +30,11 @@ func newOpenAPICommand() *cobra.Command {
 		Use:   "generate",
 		Short: "生成 OpenAPI 相关代码",
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			goCmd := exec.Command("go", "run", "github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen", "-config", "api/openapi/codegen.yaml", "api/openapi/openapi.yaml")
+			goCmd := exec.Command("go", "run", "github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@v2.5.0", "-config", "api/openapi/codegen.yaml", "api/openapi/openapi.yaml")
+			localCodegen := filepath.Join("bin", "oapi-codegen")
+			if _, err := os.Stat(localCodegen); err == nil {
+				goCmd = exec.Command(localCodegen, "-config", "api/openapi/codegen.yaml", "api/openapi/openapi.yaml")
+			}
 			goCmd.Stdout = cmd.OutOrStdout()
 			goCmd.Stderr = cmd.ErrOrStderr()
 			goCmd.Env = withToolEnv()
