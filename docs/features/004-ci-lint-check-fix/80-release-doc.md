@@ -4,7 +4,7 @@
 
 - README：无需改动
 - docs/architecture：无需改动
-- docs/playbooks：无需改动
+- docs/playbooks：已补充本地 GitHub PR token 使用约定
 - `.env.example`：无需改动
 - 示例或文档页：无需改动
 

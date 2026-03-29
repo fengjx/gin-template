@@ -52,3 +52,9 @@ bugfix 快路径：
 
 - 仓库共享 skills 统一放在 `.agents/skills/`
 - `flow-review` 必须同时遵循 `docs/code_review.md`
+
+## 本地 GitHub 操作约定
+
+- 需要由本地 AI 或脚本创建 PR 时，优先从仓库根目录 `.env.local` 读取 `GH_TOKEN`
+- `GH_TOKEN` 必须使用短期、最小权限的 fine-grained token，并限制到当前仓库
+- `.env.local` 仅用于本地机器，不得提交到仓库
