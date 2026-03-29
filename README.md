@@ -145,23 +145,30 @@ bugfix 快路径：
 <!-- template:init:start -->
 ## 模板初始化脚本
 
+模板仓库地址：
+
+- `https://github.com/fengjx/gin-template`
+
 如果这个仓库已经发布到 GitHub，可以直接用 `curl` 一键拉到本地并替换成自己的 module：
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/fengjianxin/gin-template/main/scripts/init-project.sh | bash
+curl -fsSL https://raw.githubusercontent.com/fengjx/gin-template/main/scripts/init-project.sh | bash
 ```
 
 无交互模式：
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/fengjianxin/gin-template/main/scripts/init-project.sh | \
+curl -fsSL https://raw.githubusercontent.com/fengjx/gin-template/main/scripts/init-project.sh | \
   bash -s -- --module github.com/acme/my-app --target my-app
 ```
 
 脚本会完成这些事：
 
 - 克隆模板到目标目录
+- 保留模板 git 历史，并将模板远程命名为 `template`
 - 把默认 module `gin-template` 替换成你输入的自定义 module
 - 如果你传入的是完整 module，例如 `github.com/acme/my-app`，会自动提取短名 `my-app` 作为应用名
 - 同步替换 Go import、应用名、前端包名、Docker 二进制名
+- 对 GitHub 模板地址统一使用 HTTPS，后续可用 `git fetch template` 同步模板修复
 - 可选执行 `go mod tidy` 和 `npm install`
+<!-- template:init:end -->
