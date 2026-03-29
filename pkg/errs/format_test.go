@@ -8,11 +8,12 @@ import (
 	"testing"
 )
 
+//nolint:unused // helper for future format assertions.
 func testFormatRegexp(t *testing.T, n int, arg interface{}, format, want string) {
 	t.Helper()
 	got := fmt.Sprintf(format, arg)
-	gotLines := strings.SplitN(got, "\n", -1)
-	wantLines := strings.SplitN(want, "\n", -1)
+	gotLines := strings.Split(got, "\n")
+	wantLines := strings.Split(want, "\n")
 
 	if len(wantLines) > len(gotLines) {
 		t.Errorf("test %d: wantLines(%d) > gotLines(%d):\n got: %q\nwant: %q", n+1, len(wantLines), len(gotLines), got, want)
@@ -30,6 +31,7 @@ func testFormatRegexp(t *testing.T, n int, arg interface{}, format, want string)
 	}
 }
 
+//nolint:unused // shared helper for stack-format parsing.
 var stackLineR = regexp.MustCompile(`\.`)
 
 // parseBlocks parses input into a slice, where:
@@ -48,6 +50,8 @@ var stackLineR = regexp.MustCompile(`\.`)
 //	    // Match as line
 //	  }
 //	}
+//
+//nolint:unused // helper for future format assertions.
 func parseBlocks(input string, detectStackboundaries bool) ([]string, error) {
 	var blocks []string
 
@@ -101,6 +105,7 @@ func parseBlocks(input string, detectStackboundaries bool) ([]string, error) {
 	return blocks, nil
 }
 
+//nolint:unused // helper for future format assertions.
 func testFormatCompleteCompare(t *testing.T, n int, arg interface{}, format string, want []string, detectStackBoundaries bool) {
 	gotStr := fmt.Sprintf(format, arg)
 
@@ -125,20 +130,20 @@ func testFormatCompleteCompare(t *testing.T, n int, arg interface{}, format stri
 				t.Fatalf("test %d: block %d: fmt.Sprintf(%q, err):\ngot:\n%q\nwant:\n%q\nall-got:\n%s\nall-want:\n%s\n",
 					n+1, i+1, format, got[i], want[i], prettyBlocks(got), prettyBlocks(want))
 			}
-		} else {
+		} else if got[i] != want[i] {
 			// Match as message
-			if got[i] != want[i] {
-				t.Fatalf("test %d: fmt.Sprintf(%s, err) at block %d got != want:\n got: %q\nwant: %q", n+1, format, i+1, got[i], want[i])
-			}
+			t.Fatalf("test %d: fmt.Sprintf(%s, err) at block %d got != want:\n got: %q\nwant: %q", n+1, format, i+1, got[i], want[i])
 		}
 	}
 }
 
+//nolint:unused // helper for future format assertions.
 type wrapper struct {
 	wrap func(err error) error
 	want []string
 }
 
+//nolint:unused // helper for future format assertions.
 func prettyBlocks(blocks []string) string {
 	var out []string
 
@@ -149,6 +154,7 @@ func prettyBlocks(blocks []string) string {
 	return "   " + strings.Join(out, "\n   ")
 }
 
+//nolint:unused // helper for future format assertions.
 func testGenericRecursive(t *testing.T, beforeErr error, beforeWant []string, list []wrapper, maxDepth int) {
 	if len(beforeWant) == 0 {
 		panic("beforeWant must not be empty")
@@ -170,9 +176,12 @@ func testGenericRecursive(t *testing.T, beforeErr error, beforeWant []string, li
 
 		// Merge two stacks behind each other.
 		if strings.ContainsAny(beforeWant[last], "\n") && strings.ContainsAny(w.want[0], "\n") {
-			want = append(beforeWant[:last], append([]string{beforeWant[last] + "((?s).*)" + w.want[0]}, w.want[1:]...)...)
+			want = append([]string{}, beforeWant[:last]...)
+			want = append(want, beforeWant[last]+"((?s).*)"+w.want[0])
+			want = append(want, w.want[1:]...)
 		} else {
-			want = append(beforeWant, w.want...)
+			want = append([]string{}, beforeWant...)
+			want = append(want, w.want...)
 		}
 
 		testFormatCompleteCompare(t, maxDepth, err, "%+v", want, false)

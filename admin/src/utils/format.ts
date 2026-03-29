@@ -3,10 +3,7 @@ export function formatDateTime(value?: string | number | null) {
     return '-';
   }
 
-  const date =
-    typeof value === 'number'
-      ? new Date(value * 1000)
-      : new Date(value);
+  const date = typeof value === 'number' ? new Date(value * 1000) : new Date(value);
   if (Number.isNaN(date.getTime())) {
     return String(value);
   }

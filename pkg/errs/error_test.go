@@ -13,9 +13,9 @@ import (
 func TestWrap(t *testing.T) {
 	err := errors.New("err1")
 	err = Wrap(err, "err2")
-	t.Log(fmt.Sprintf("v %v", err))
-	t.Log(fmt.Sprintf("#v %#v", err))
-	t.Log(fmt.Sprintf("+v %+v", err))
+	t.Logf("v %v", err)
+	t.Logf("#v %#v", err)
+	t.Logf("+v %+v", err)
 }
 
 func TestCause(t *testing.T) {

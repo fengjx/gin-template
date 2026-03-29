@@ -1,0 +1,10 @@
+id: 004
+slug: ci-lint-check-fix
+title: 修复 GitHub CI 的 backend-lint 与 frontend-check
+type: bugfix
+status: done
+branch: main
+owner: codex
+created_at: "2026-03-29"
+updated_at: "2026-03-29"
+current_gate: done

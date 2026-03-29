@@ -70,10 +70,13 @@ describe('api client', () => {
         ),
       )
       .mockResolvedValueOnce(
-        new Response(JSON.stringify({ status: 0, msg: 'ok', data: { uid: 1, username: 'admin' } }), {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' },
-        }),
+        new Response(
+          JSON.stringify({ status: 0, msg: 'ok', data: { uid: 1, username: 'admin' } }),
+          {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+          },
+        ),
       );
 
     const result = await api.me();
@@ -89,8 +92,8 @@ describe('api client', () => {
 
   it('会根据错误码统一弹出 tips', async () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
-        new Response(
-          JSON.stringify({
+      new Response(
+        JSON.stringify({
           status: 100104,
           msg: '没有权限',
           details: '需要管理员权限',
@@ -152,9 +155,7 @@ describe('api client', () => {
         },
       );
 
-    fetchMock
-      .mockResolvedValueOnce(problem())
-      .mockResolvedValueOnce(problem());
+    fetchMock.mockResolvedValueOnce(problem()).mockResolvedValueOnce(problem());
 
     await expect(api.systemStatus()).rejects.toSatisfy((error) => isApiError(error));
     await expect(api.about()).rejects.toSatisfy((error) => isApiError(error));

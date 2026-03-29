@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import type {
   ApiEnvelope,
   AuthResponse,
@@ -11,7 +12,6 @@ import type {
   UserListResponse,
   UserUpdateRequest,
 } from './types';
-import { toast } from 'sonner';
 
 type ApiRequestInit = RequestInit & {
   skipErrorTip?: boolean;
@@ -66,12 +66,12 @@ function tipKey(error: ApiError, title: string, description?: string) {
 function shouldShowTip(key: string) {
   const now = Date.now();
   for (const [cachedKey, cachedAt] of recentErrorTips.entries()) {
-    if (now-cachedAt > ERROR_TIP_DEDUPE_MS) {
+    if (now - cachedAt > ERROR_TIP_DEDUPE_MS) {
       recentErrorTips.delete(cachedKey);
     }
   }
   const previousAt = recentErrorTips.get(key);
-  if (previousAt && now-previousAt < ERROR_TIP_DEDUPE_MS) {
+  if (previousAt && now - previousAt < ERROR_TIP_DEDUPE_MS) {
     return false;
   }
   recentErrorTips.set(key, now);
@@ -111,10 +111,7 @@ function resolveErrorTip(error: ApiError) {
     default:
       return {
         title: msg || details || '请求失败',
-        description:
-          details && details !== msg
-            ? details
-            : undefined,
+        description: details && details !== msg ? details : undefined,
       };
   }
 }
@@ -147,7 +144,9 @@ function handleApiError(error: ApiError, options: { skipErrorTip?: boolean } = {
   });
 }
 
-async function readResponseBody(response: Response): Promise<ApiEnvelope<unknown> | string | undefined> {
+async function readResponseBody(
+  response: Response,
+): Promise<ApiEnvelope<unknown> | string | undefined> {
   if (response.status === 204) {
     return undefined;
   }
@@ -159,13 +158,19 @@ async function readResponseBody(response: Response): Promise<ApiEnvelope<unknown
   return text || undefined;
 }
 
-async function parseResponse<T>(response: Response, options: { skipErrorTip?: boolean } = {}): Promise<T> {
+async function parseResponse<T>(
+  response: Response,
+  options: { skipErrorTip?: boolean } = {},
+): Promise<T> {
   const data = await readResponseBody(response);
   if (!response.ok) {
-    const problem = isApiEnvelope(data) ? data as Problem : undefined;
+    const problem = isApiEnvelope(data) ? (data as Problem) : undefined;
     const error = new ApiError(
       response.status,
-      problem?.details || problem?.msg || (typeof data === 'string' ? data : '') || response.statusText,
+      problem?.details ||
+        problem?.msg ||
+        (typeof data === 'string' ? data : '') ||
+        response.statusText,
       problem,
     );
     handleApiError(error, options);
