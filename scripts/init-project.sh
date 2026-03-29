@@ -11,6 +11,27 @@ REPO_URL="$DEFAULT_REPO_URL"
 REPO_REF="$DEFAULT_REF"
 SKIP_INSTALL="false"
 
+normalize_repo_url() {
+  local raw_url="$1"
+  case "$raw_url" in
+    git@github.com:*)
+      echo "https://github.com/${raw_url#git@github.com:}"
+      ;;
+    ssh://git@github.com/*)
+      echo "https://github.com/${raw_url#ssh://git@github.com/}"
+      ;;
+    http://github.com/*)
+      echo "https://github.com/${raw_url#http://github.com/}"
+      ;;
+    https://github.com/*)
+      echo "$raw_url"
+      ;;
+    *)
+      echo "$raw_url"
+      ;;
+  esac
+}
+
 usage() {
   cat <<'EOF'
 用法:
@@ -96,9 +117,14 @@ need_cmd() {
 need_cmd git
 need_cmd perl
 
+CANONICAL_REPO_URL="$(normalize_repo_url "$REPO_URL")"
+
 echo "==> 克隆模板仓库"
-git clone --depth=1 --branch "$REPO_REF" "$REPO_URL" "$TARGET_DIR"
-rm -rf "$TARGET_DIR/.git"
+git clone --branch "$REPO_REF" "$CANONICAL_REPO_URL" "$TARGET_DIR"
+if git -C "$TARGET_DIR" remote get-url origin >/dev/null 2>&1; then
+  git -C "$TARGET_DIR" remote rename origin template
+fi
+git -C "$TARGET_DIR" remote set-url template "$CANONICAL_REPO_URL"
 rm -rf "$TARGET_DIR/.idea" "$TARGET_DIR/.cache" "$TARGET_DIR/runtime" "$TARGET_DIR/admin/node_modules" "$TARGET_DIR/admin/dist/assets" "$TARGET_DIR/admin/tsconfig.tsbuildinfo"
 
 replace_literal() {
@@ -178,6 +204,7 @@ cat <<EOF
 
 建议下一步:
   cd $TARGET_DIR
+  git fetch template
   make dev-backend
   make dev-admin
 EOF
