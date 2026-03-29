@@ -13,6 +13,7 @@
 ## 执行命令
 
 - `env GOCACHE=$(pwd)/.cache/go-build GOMODCACHE=$(pwd)/.cache/go-mod GOLANGCI_LINT_CACHE=$(pwd)/.cache/go/golangci-lint ./bin/golangci-lint run`
+- `env GOCACHE=$(pwd)/.cache/go/build GOMODCACHE=$(pwd)/.cache/go/mod GOLANGCI_LINT_CACHE=$(pwd)/.cache/go/golangci-lint ./bin/golangci-lint run ./...`
 - `make verify`
 - `make check`
 
@@ -20,6 +21,7 @@
 
 - 以上命令均通过。
 - `make check` 已覆盖 `config verify`、`openapi validate`、`make lint`、`make test`、前端 `typecheck` 与 `build`。
+- GitHub Actions `backend-lint` 失败日志已复核，根因为 `golangci-lint v1.64.8` 与目标 Go 1.25 不兼容，而非新增代码 lint 问题。
 
 ## 未覆盖项
 

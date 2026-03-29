@@ -12,6 +12,7 @@
 
 - 修复 GitHub CI 中 `backend-lint` 与 `frontend-check` 的阻塞问题。
 - 后端修复聚焦静态检查兼容与测试文件规范化，前端修复聚焦 `Biome` 格式漂移。
+- 额外修复了 `golangci-lint v1.64.8` 与 Go 1.25 的工具链不兼容问题，并同步本地 setup 与 CI 版本。
 - 已补齐本地复现、验证、review 与 release 闭环文档。
 
 ## 合并前确认
