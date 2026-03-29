@@ -92,6 +92,10 @@ func Error(msg string, fields ...zap.Field) {
 	App().Error(msg, fields...)
 }
 
+func Panic(msg string, fields ...zap.Field) {
+	App().Panic(msg, fields...)
+}
+
 func DebugCtx(ctx context.Context, msg string, fields ...zap.Field) {
 	App().Debug(msg, append(FieldsFromCtx(ctx), fields...)...)
 }
@@ -106,6 +110,10 @@ func WarnCtx(ctx context.Context, msg string, fields ...zap.Field) {
 
 func ErrorCtx(ctx context.Context, msg string, fields ...zap.Field) {
 	App().Error(msg, append(FieldsFromCtx(ctx), fields...)...)
+}
+
+func PanicCtx(ctx context.Context, msg string, fields ...zap.Field) {
+	App().PanicCtx(ctx, msg, append(FieldsFromCtx(ctx), fields...)...)
 }
 
 func AccessInfo(msg string, fields ...zap.Field) {
