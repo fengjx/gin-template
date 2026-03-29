@@ -12,7 +12,7 @@
 
 - 收敛 `serve` 启动阶段的 bootstrap 与 service init 入口。
 - 为 `internal/app/log` 补齐 `Panic` / `PanicCtx` 包级包装，统一启动期错误日志出口。
-- PR：待创建
+- PR：[#9](https://github.com/fengjx/gin-template/pull/9)
 
 ## 合并前确认
 
