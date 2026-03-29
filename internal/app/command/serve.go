@@ -22,8 +22,9 @@ func newServeCommand() *cobra.Command {
 		Use:   "serve",
 		Short: "启动服务",
 		RunE: func(_ *cobra.Command, _ []string) error {
+			ctx := context.Background()
 			if err := config.Load(); err != nil {
-				return errs.Wrap(err, "加载配置失败")
+				appLog.Panic("load config error", zap.Error(err))
 			}
 			if config.Get().OpenAPI.ValidateOnBoot {
 				if err := appOpenAPI.ValidateEmbeddedSpec(); err != nil {
@@ -31,14 +32,11 @@ func newServeCommand() *cobra.Command {
 				}
 			}
 			_ = db.Get()
-			if err := bootstrap.EnsureSystemOptions(context.Background()); err != nil {
-				return errs.Wrap(err, "初始化系统配置失败")
+			if err := boot(ctx); err != nil {
+				appLog.Panic("boot error", zap.Error(err))
 			}
-			if err := bootstrap.EnsureDefaultAdmin(context.Background()); err != nil {
-				return errs.Wrap(err, "初始化默认管理员失败")
-			}
-			if err := appService.StartOptionAutoRefresh(context.Background()); err != nil {
-				return errs.Wrap(err, "启动配置自动刷新失败")
+			if err := appService.Init(ctx); err != nil {
+				appLog.Panic("init service error", zap.Error(err))
 			}
 			defer appLog.Sync()
 			appLog.Info("server 启动", zap.String("env", string(appEnv.Current())))
@@ -48,4 +46,14 @@ func newServeCommand() *cobra.Command {
 			return nil
 		},
 	}
+}
+
+func boot(ctx context.Context) error {
+	if err := bootstrap.EnsureSystemOptions(ctx); err != nil {
+		return errs.Wrap(err, "初始化系统配置失败")
+	}
+	if err := bootstrap.EnsureDefaultAdmin(ctx); err != nil {
+		return errs.Wrap(err, "初始化默认管理员失败")
+	}
+	return nil
 }

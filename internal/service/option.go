@@ -45,12 +45,6 @@ func newOptionWithLoader(
 	}
 }
 
-// StartOptionAutoRefresh 启动系统配置缓存的后台刷新任务。
-// 启动时会先同步加载一次，确保服务对外提供能力前缓存已经可用。
-func StartOptionAutoRefresh(ctx context.Context) error {
-	return defaultOption.StartAutoRefresh(ctx)
-}
-
 // RefreshOptions 会立即从数据库重新加载全部配置并替换内存快照。
 // 更新配置后可以主动调用它，避免等待下一个定时周期。
 func RefreshOptions(ctx context.Context) error {
