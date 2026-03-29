@@ -14,10 +14,9 @@
 - 初始化脚本改为保留 git 历史并将模板远程统一为 `template` / HTTPS。
 - 刷新 `admin/package-lock.json`，使新项目首次安装后的 `npm audit` 归零。
 - 分支已推送：`codex/005-init-project-bootstrap-fix`
-- 自动创建 PR 阻塞：GitHub API 返回 `401 Bad credentials`，浏览器兜底访问 PR 页面时命中 GitHub 登录页，当前环境无可复用登录态。
-- 手动创建 PR 链接：`https://github.com/fengjx/gin-template/pull/new/codex/005-init-project-bootstrap-fix`
+- PR：[#7](https://github.com/fengjx/gin-template/pull/7)
 
 ## 合并前确认
 
-- [ ] feature.yaml.status 已更新为 `done`
-- [ ] feature.yaml.current_gate 已更新为 `done`
+- [x] feature.yaml.status 已更新为 `done`
+- [x] feature.yaml.current_gate 已更新为 `done`

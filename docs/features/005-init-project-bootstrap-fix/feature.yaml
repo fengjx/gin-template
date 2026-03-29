@@ -2,9 +2,9 @@ id: 005
 slug: init-project-bootstrap-fix
 title: 修复初始化脚本路径、模板远程保留与 npm 审计告警
 type: bugfix
-status: blocked
+status: done
 branch: codex/005-init-project-bootstrap-fix
 owner: codex
 created_at: "2026-03-29"
 updated_at: "2026-03-29"
-current_gate: doc-release
+current_gate: done
