@@ -68,14 +68,16 @@
 - 生成文件禁止手改；错误返回统一走现有 Problem / envelope 约定
 - 需要更细的原子流程时，优先引用 `docs/playbooks/*`，不要把长规则再复制到 feature 文档里
 
-## Execution Plan 约定
+## Definition Of Done
 
-- 新需求开始后，必须先从最新 `main` 创建/切换到本次迭代专用分支，再创建 `docs/features/<NNN>-<slug>/` 或开始任何代码、测试、文档写入
-- 本仓库不额外维护独立 `PLANS.md`, 角查看 `docs/playbooks/feature-lifecycle.md`
-- `docs/features/<NNN>-<slug>/` 就是 execution plan 与实现闭环的唯一载体
-- 任何非微小功能改动都必须创建 feature 目录
-- 标准流程：`flow-idea -> flow-prd -> flow-spec -> flow-tasks -> flow-impl -> flow-test + flow-review -> flow-investigate(如有问题) -> flow-doc-release`
-- bugfix 快路径：`flow-investigate -> flow-spec -> flow-tasks -> flow-impl -> flow-test -> flow-review -> flow-doc-release`
+只有同时满足以下条件才算完成：
+
+- 相关 feature 文档已推进到正确阶段，必要时 `feature.yaml.status=done`
+- 与改动直接相关的测试、lint、typecheck、构建命令已经执行并记录
+- 行为与 `docs/features/<NNN>-<slug>/20-tech-spec.md` 一致，没有未解释的规格漂移
+- `docs/code_review.md` 要求的 review 已完成，阻塞问题已关闭或显式记录残余风险
+- 文档与配置说明已同步到 `80-release-doc.md`，且 `flow-doc-release` 已把 `feature.yaml.current_gate` 推进到 `pr`
+- `flow-pr` 完成后已创建 PR；若受 `GH_TOKEN`，也可以从 `.env.local` 文件读取、权限或网络阻塞，阻塞原因已记录到 `80-release-doc.md`，且 `feature.yaml.status` 仍不是 `done`
 
 ## Definition Of Done
 
