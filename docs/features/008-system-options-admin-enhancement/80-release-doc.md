@@ -11,4 +11,4 @@
 ## 发布注意事项
 
 - 旧库需要先执行 `database/upgrade/{driver}/20260411_add_sys_options_type_status.sql`。
-- 本次 PR 与发布信息待 `flow-doc-release` 阶段补齐。
+- PR：[#11](https://github.com/fengjx/gin-template/pull/11)

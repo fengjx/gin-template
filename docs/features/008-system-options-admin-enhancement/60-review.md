@@ -17,4 +17,3 @@
 ## 残余风险
 
 - 旧环境仍需先执行 `database/upgrade/{driver}/20260411_add_sys_options_type_status.sql`，否则 schema version 校验会阻止服务按新版本启动。
-- `make verify` 在提交前阶段会因为本次新增的生成物改动返回非零；提交后这部分差异应消失。

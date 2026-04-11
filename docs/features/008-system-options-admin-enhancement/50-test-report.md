@@ -16,7 +16,7 @@
 - `cd admin && npm run test`：通过
 - `make lint`：通过
 - `make check`：通过（已在最终权限口径与 UI 修正后重新执行）
-- `make verify`：已执行；生成步骤通过，但命令按仓库约定会对 `internal/app/http/openapi.gen.go` 和 `admin/src/api/generated.ts` 的未提交改动做 diff，因此在当前 feature 实现阶段返回非零。这两处 diff 均为本次 OpenAPI 契约变更带来的预期生成物更新。
+- `make verify`：通过（已在提交后对生成物一致性再次确认）
 
 ## 覆盖点
 
