@@ -13,7 +13,7 @@ database:
   driver: sqlite
   dsn: ""
   sqlite_path: runtime/data/app.db
-  schema_version: 2
+  schema_version: 3
 trace:
   header_name: X-Trace-Id
 auth:

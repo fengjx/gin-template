@@ -17,11 +17,13 @@ type pprofURLResponse struct {
 	URL string `json:"url"`
 }
 
-type updateOptionRequest struct {
+type optionWriteRequest struct {
 	Key         string `json:"key"`
 	Value       string `json:"value"`
 	Description string `json:"description"`
 	IsPublic    bool   `json:"is_public"`
+	Type        string `json:"type"`
+	Status      string `json:"status"`
 }
 
 type optionPayload struct {
@@ -30,6 +32,8 @@ type optionPayload struct {
 	OptionValue string `json:"option_value"`
 	Description string `json:"description"`
 	IsPublic    bool   `json:"is_public"`
+	Type        string `json:"type"`
+	Status      string `json:"status"`
 	CTime       int64  `json:"ctime"`
 	UTime       int64  `json:"utime"`
 }
@@ -49,6 +53,8 @@ func toOptionPayload(item *sysoptionStore.Model) optionPayload {
 		OptionValue: item.OptionValue,
 		Description: item.Description,
 		IsPublic:    item.IsPublic,
+		Type:        item.Type,
+		Status:      item.Status,
 		CTime:       timex.ToUnixSeconds(item.CTime),
 		UTime:       timex.ToUnixSeconds(item.UTime),
 	}

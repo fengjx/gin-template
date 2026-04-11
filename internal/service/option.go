@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"go.uber.org/zap"
@@ -15,7 +16,14 @@ import (
 	"gin-template/pkg/errs"
 )
 
-var errOptionNotFound = errors.New("配置项不存在")
+var (
+	ErrOptionNotFound      = errors.New("配置项不存在")
+	ErrOptionAlreadyExists = errors.New("配置项已存在")
+	ErrInvalidOptionKey    = errors.New("配置项 key 无效")
+	ErrInvalidOptionType   = errors.New("配置项类型无效")
+	ErrInvalidOptionStatus = errors.New("配置项状态无效")
+	ErrInvalidOptionJSON   = errors.New("JSON 配置值无效")
+)
 
 // option 负责维护系统配置项的内存快照，并按固定周期刷新。
 // 这样业务读取常用配置时可以直接走内存，避免每次都访问数据库。
@@ -56,6 +64,23 @@ type UpdateOptionRequest struct {
 	Value       string
 	Description string
 	IsPublic    bool
+	Type        string
+	Status      string
+}
+
+// CreateOptionRequest 定义了新增系统配置时需要写入的字段。
+type CreateOptionRequest struct {
+	Key         string
+	Value       string
+	Description string
+	IsPublic    bool
+	Type        string
+	Status      string
+}
+
+// CreateOption 会创建新的系统配置，并在成功后立即刷新内存缓存。
+func CreateOption(ctx context.Context, req CreateOptionRequest) (*sysoptionStore.Model, error) {
+	return defaultOption.Create(ctx, req)
 }
 
 // UpdateOption 会更新数据库中的配置项，并在成功后立即刷新内存缓存。
@@ -96,17 +121,64 @@ func (s *option) Refresh(ctx context.Context) error {
 	return s.cache.Refresh(ctx)
 }
 
+// Create 会校验并创建新的配置记录，再刷新内存缓存。
+func (s *option) Create(ctx context.Context, req CreateOptionRequest) (*sysoptionStore.Model, error) {
+	key, err := normalizeOptionKey(req.Key)
+	if err != nil {
+		return nil, err
+	}
+	if err := validateOptionPayload(req.Value, req.Type, req.Status); err != nil {
+		return nil, err
+	}
+
+	if _, err := sysoptionStore.ByKey(ctx, key); err == nil {
+		return nil, errs.WithStack(fmt.Errorf("%w: %s", ErrOptionAlreadyExists, key))
+	} else if !sysoptionStore.IsNotFound(err) {
+		return nil, errs.Wrap(err, "检查配置项是否已存在失败")
+	}
+
+	item := &sysoptionStore.Model{
+		ID:          key,
+		OptionKey:   key,
+		OptionValue: req.Value,
+		Description: req.Description,
+		IsPublic:    req.IsPublic,
+		Type:        req.Type,
+		Status:      req.Status,
+	}
+	if err := sysoptionStore.Create(ctx, item); err != nil {
+		return nil, errs.Wrap(err, "创建配置项失败")
+	}
+	if err := s.Refresh(ctx); err != nil {
+		return nil, errs.Wrap(err, "刷新配置缓存失败")
+	}
+	return item, nil
+}
+
 // Update 会先更新数据库中的配置记录，再刷新内存缓存。
 // 这样可以保证同一进程内后续读取立即拿到最新值。
 func (s *option) Update(ctx context.Context, key string, req UpdateOptionRequest) (*sysoptionStore.Model, error) {
+	key, err := normalizeOptionKey(key)
+	if err != nil {
+		return nil, err
+	}
+	if err := validateOptionPayload(req.Value, req.Type, req.Status); err != nil {
+		return nil, err
+	}
+
 	item, err := sysoptionStore.ByKey(ctx, key)
 	if err != nil {
+		if sysoptionStore.IsNotFound(err) {
+			return nil, errs.WithStack(fmt.Errorf("%w: %s", ErrOptionNotFound, key))
+		}
 		return nil, errs.Wrap(err, "查询待更新配置项失败")
 	}
 
 	item.OptionValue = req.Value
 	item.Description = req.Description
 	item.IsPublic = req.IsPublic
+	item.Type = req.Type
+	item.Status = req.Status
 	if err := sysoptionStore.Save(ctx, item); err != nil {
 		return nil, errs.Wrap(err, "保存配置项失败")
 	}
@@ -127,7 +199,10 @@ func (s *option) GetString(ctx context.Context, key string) (string, error) {
 		item, ok = s.cache.Get(key)
 	}
 	if !ok {
-		return "", errs.WithStack(fmt.Errorf("%w: %s", errOptionNotFound, key))
+		return "", errs.WithStack(fmt.Errorf("%w: %s", ErrOptionNotFound, key))
+	}
+	if item.Status != sysoptionStore.StatusOnline {
+		return "", errs.WithStack(fmt.Errorf("%w: %s", ErrOptionNotFound, key))
 	}
 	return item.OptionValue, nil
 }
@@ -166,4 +241,25 @@ func newOptionCacheLoader(
 		logger.InfoCtx(ctx, "option cache refreshed", zap.Int("count", len(nextCache)))
 		return nextCache, nil
 	}
+}
+
+func normalizeOptionKey(key string) (string, error) {
+	trimmed := strings.TrimSpace(key)
+	if trimmed == "" {
+		return "", errs.WithStack(ErrInvalidOptionKey)
+	}
+	return trimmed, nil
+}
+
+func validateOptionPayload(value, valueType, status string) error {
+	if valueType != sysoptionStore.TypeString && valueType != sysoptionStore.TypeJSON {
+		return errs.WithStack(fmt.Errorf("%w: %s", ErrInvalidOptionType, valueType))
+	}
+	if status != sysoptionStore.StatusOnline && status != sysoptionStore.StatusOffline {
+		return errs.WithStack(fmt.Errorf("%w: %s", ErrInvalidOptionStatus, status))
+	}
+	if valueType == sysoptionStore.TypeJSON && !json.Valid([]byte(value)) {
+		return errs.WithStack(ErrInvalidOptionJSON)
+	}
+	return nil
 }

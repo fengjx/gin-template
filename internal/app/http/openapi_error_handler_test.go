@@ -34,6 +34,7 @@ func (noopServer) DeleteFilesId(c *gin.Context, _ string) { c.Status(http.Status
 //nolint:revive // 生成的 openapi 接口要求保持 GetFilesId 这种命名。
 func (noopServer) GetFilesId(c *gin.Context, _ string)       { c.Status(http.StatusNoContent) }
 func (noopServer) GetOptions(c *gin.Context)                 { c.Status(http.StatusNoContent) }
+func (noopServer) PostOptions(c *gin.Context)                { c.Status(http.StatusNoContent) }
 func (noopServer) PutOptions(c *gin.Context)                 { c.Status(http.StatusNoContent) }
 func (noopServer) GetSystemAbout(c *gin.Context)             { c.Status(http.StatusNoContent) }
 func (noopServer) GetSystemNotice(c *gin.Context)            { c.Status(http.StatusNoContent) }

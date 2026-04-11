@@ -12,6 +12,7 @@ export type FileItem = components['schemas']['File'];
 export type FileListResponse = components['schemas']['FileListResponse'];
 export type MessageResponse = components['schemas']['MessageResponse'];
 export type OptionItem = components['schemas']['Option'];
+export type OptionWriteRequest = components['schemas']['OptionWriteRequest'];
 export type Problem = ApiEnvelope<null>;
 export type User = components['schemas']['User'];
 export type UserCreateRequest = components['schemas']['UserCreateRequest'];

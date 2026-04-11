@@ -775,12 +775,7 @@ export interface paths {
             };
             requestBody: {
                 content: {
-                    "application/json": {
-                        key: string;
-                        value: string;
-                        description?: string;
-                        is_public?: boolean;
-                    };
+                    "application/json": components["schemas"]["OptionWriteRequest"];
                 };
             };
             responses: {
@@ -796,7 +791,31 @@ export interface paths {
                 default: components["responses"]["ProblemResponse"];
             };
         };
-        post?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["OptionWriteRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["OptionEnvelope"];
+                    };
+                };
+                default: components["responses"]["ProblemResponse"];
+            };
+        };
         delete?: never;
         options?: never;
         head?: never;
@@ -1049,6 +1068,10 @@ export interface components {
             option_value: string;
             description: string;
             is_public: boolean;
+            /** @enum {string} */
+            type: "string" | "json";
+            /** @enum {string} */
+            status: "online" | "offline";
             /**
              * Format: int64
              * @description Unix 秒级时间戳
@@ -1059,6 +1082,16 @@ export interface components {
              * @description Unix 秒级时间戳
              */
             utime: number;
+        };
+        OptionWriteRequest: {
+            key: string;
+            value: string;
+            description?: string;
+            is_public?: boolean;
+            /** @enum {string} */
+            type: "string" | "json";
+            /** @enum {string} */
+            status: "online" | "offline";
         };
         OptionListEnvelope: components["schemas"]["ApiResponseBase"] & {
             data: components["schemas"]["Option"][];

@@ -174,15 +174,35 @@ components:
             data: { $ref: '#/components/schemas/FileListResponse' }
     Option:
       type: object
-      required: [id, option_key, option_value, description, is_public, ctime, utime]
+      required: [id, option_key, option_value, description, is_public, type, status, ctime, utime]
       properties:
         id: { type: string }
         option_key: { type: string }
         option_value: { type: string }
         description: { type: string }
         is_public: { type: boolean }
+        type:
+          type: string
+          enum: [string, json]
+        status:
+          type: string
+          enum: [online, offline]
         ctime: { type: integer, format: int64, description: Unix 秒级时间戳 }
         utime: { type: integer, format: int64, description: Unix 秒级时间戳 }
+    OptionWriteRequest:
+      type: object
+      required: [key, value, type, status]
+      properties:
+        key: { type: string }
+        value: { type: string }
+        description: { type: string }
+        is_public: { type: boolean }
+        type:
+          type: string
+          enum: [string, json]
+        status:
+          type: string
+          enum: [online, offline]
     OptionListEnvelope:
       allOf:
         - $ref: '#/components/schemas/ApiResponseBase'
@@ -562,6 +582,22 @@ paths:
               schema: { $ref: '#/components/schemas/OptionListEnvelope' }
         default:
           $ref: '#/components/responses/ProblemResponse'
+    post:
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/OptionWriteRequest' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/OptionEnvelope' }
+        default:
+          $ref: '#/components/responses/ProblemResponse'
     put:
       security:
         - bearerAuth: []
@@ -569,14 +605,7 @@ paths:
         required: true
         content:
           application/json:
-            schema:
-              type: object
-              required: [key, value]
-              properties:
-                key: { type: string }
-                value: { type: string }
-                description: { type: string }
-                is_public: { type: boolean }
+            schema: { $ref: '#/components/schemas/OptionWriteRequest' }
       responses:
         '200':
           description: OK

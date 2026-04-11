@@ -20,6 +20,30 @@ const (
 	BearerAuthScopes = "bearerAuth.Scopes"
 )
 
+// Defines values for OptionStatus.
+const (
+	OptionStatusOffline OptionStatus = "offline"
+	OptionStatusOnline  OptionStatus = "online"
+)
+
+// Defines values for OptionType.
+const (
+	OptionTypeJson   OptionType = "json"
+	OptionTypeString OptionType = "string"
+)
+
+// Defines values for OptionWriteRequestStatus.
+const (
+	OptionWriteRequestStatusOffline OptionWriteRequestStatus = "offline"
+	OptionWriteRequestStatusOnline  OptionWriteRequestStatus = "online"
+)
+
+// Defines values for OptionWriteRequestType.
+const (
+	OptionWriteRequestTypeJson   OptionWriteRequestType = "json"
+	OptionWriteRequestTypeString OptionWriteRequestType = "string"
+)
+
 // ApiResponseBase defines model for ApiResponseBase.
 type ApiResponseBase struct {
 	Msg string `json:"msg"`
@@ -111,16 +135,24 @@ type MessageResponse struct {
 // Option defines model for Option.
 type Option struct {
 	// Ctime Unix 秒级时间戳
-	Ctime       int64  `json:"ctime"`
-	Description string `json:"description"`
-	Id          string `json:"id"`
-	IsPublic    bool   `json:"is_public"`
-	OptionKey   string `json:"option_key"`
-	OptionValue string `json:"option_value"`
+	Ctime       int64        `json:"ctime"`
+	Description string       `json:"description"`
+	Id          string       `json:"id"`
+	IsPublic    bool         `json:"is_public"`
+	OptionKey   string       `json:"option_key"`
+	OptionValue string       `json:"option_value"`
+	Status      OptionStatus `json:"status"`
+	Type        OptionType   `json:"type"`
 
 	// Utime Unix 秒级时间戳
 	Utime int64 `json:"utime"`
 }
+
+// OptionStatus defines model for Option.Status.
+type OptionStatus string
+
+// OptionType defines model for Option.Type.
+type OptionType string
 
 // OptionEnvelope defines model for OptionEnvelope.
 type OptionEnvelope struct {
@@ -153,6 +185,22 @@ type OptionValueEnvelope struct {
 type OptionValueResponse struct {
 	Value string `json:"value"`
 }
+
+// OptionWriteRequest defines model for OptionWriteRequest.
+type OptionWriteRequest struct {
+	Description *string                  `json:"description,omitempty"`
+	IsPublic    *bool                    `json:"is_public,omitempty"`
+	Key         string                   `json:"key"`
+	Status      OptionWriteRequestStatus `json:"status"`
+	Type        OptionWriteRequestType   `json:"type"`
+	Value       string                   `json:"value"`
+}
+
+// OptionWriteRequestStatus defines model for OptionWriteRequest.Status.
+type OptionWriteRequestStatus string
+
+// OptionWriteRequestType defines model for OptionWriteRequest.Type.
+type OptionWriteRequestType string
 
 // Problem defines model for Problem.
 type Problem struct {
@@ -267,14 +315,6 @@ type PostFilesUploadMultipartBody struct {
 	File *openapi_types.File `json:"file,omitempty"`
 }
 
-// PutOptionsJSONBody defines parameters for PutOptions.
-type PutOptionsJSONBody struct {
-	Description *string `json:"description,omitempty"`
-	IsPublic    *bool   `json:"is_public,omitempty"`
-	Key         string  `json:"key"`
-	Value       string  `json:"value"`
-}
-
 // GetUsersParams defines parameters for GetUsers.
 type GetUsersParams struct {
 	Page     *int `form:"page,omitempty" json:"page,omitempty"`
@@ -309,8 +349,11 @@ type PostAuthRegisterJSONRequestBody = RegisterRequest
 // PostFilesUploadMultipartRequestBody defines body for PostFilesUpload for multipart/form-data ContentType.
 type PostFilesUploadMultipartRequestBody PostFilesUploadMultipartBody
 
+// PostOptionsJSONRequestBody defines body for PostOptions for application/json ContentType.
+type PostOptionsJSONRequestBody = OptionWriteRequest
+
 // PutOptionsJSONRequestBody defines body for PutOptions for application/json ContentType.
-type PutOptionsJSONRequestBody PutOptionsJSONBody
+type PutOptionsJSONRequestBody = OptionWriteRequest
 
 // PostUsersJSONRequestBody defines body for PostUsers for application/json ContentType.
 type PostUsersJSONRequestBody = UserCreateRequest
@@ -365,6 +408,9 @@ type ServerInterface interface {
 
 	// (GET /options)
 	GetOptions(c *gin.Context)
+
+	// (POST /options)
+	PostOptions(c *gin.Context)
 
 	// (PUT /options)
 	PutOptions(c *gin.Context)
@@ -641,6 +687,21 @@ func (siw *ServerInterfaceWrapper) GetOptions(c *gin.Context) {
 	}
 
 	siw.Handler.GetOptions(c)
+}
+
+// PostOptions operation middleware
+func (siw *ServerInterfaceWrapper) PostOptions(c *gin.Context) {
+
+	c.Set(BearerAuthScopes, []string{})
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		middleware(c)
+		if c.IsAborted() {
+			return
+		}
+	}
+
+	siw.Handler.PostOptions(c)
 }
 
 // PutOptions operation middleware
@@ -925,6 +986,7 @@ func RegisterHandlersWithOptions(router gin.IRouter, si ServerInterface, options
 	router.DELETE(options.BaseURL+"/files/:id", wrapper.DeleteFilesId)
 	router.GET(options.BaseURL+"/files/:id", wrapper.GetFilesId)
 	router.GET(options.BaseURL+"/options", wrapper.GetOptions)
+	router.POST(options.BaseURL+"/options", wrapper.PostOptions)
 	router.PUT(options.BaseURL+"/options", wrapper.PutOptions)
 	router.GET(options.BaseURL+"/system/about", wrapper.GetSystemAbout)
 	router.GET(options.BaseURL+"/system/notice", wrapper.GetSystemNotice)
@@ -1342,6 +1404,35 @@ func (response GetOptionsdefaultJSONResponse) VisitGetOptionsResponse(w http.Res
 	return json.NewEncoder(w).Encode(response.Body)
 }
 
+type PostOptionsRequestObject struct {
+	Body *PostOptionsJSONRequestBody
+}
+
+type PostOptionsResponseObject interface {
+	VisitPostOptionsResponse(w http.ResponseWriter) error
+}
+
+type PostOptions200JSONResponse OptionEnvelope
+
+func (response PostOptions200JSONResponse) VisitPostOptionsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostOptionsdefaultJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response PostOptionsdefaultJSONResponse) VisitPostOptionsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(response.StatusCode)
+
+	return json.NewEncoder(w).Encode(response.Body)
+}
+
 type PutOptionsRequestObject struct {
 	Body *PutOptionsJSONRequestBody
 }
@@ -1731,6 +1822,9 @@ type StrictServerInterface interface {
 
 	// (GET /options)
 	GetOptions(ctx context.Context, request GetOptionsRequestObject) (GetOptionsResponseObject, error)
+
+	// (POST /options)
+	PostOptions(ctx context.Context, request PostOptionsRequestObject) (PostOptionsResponseObject, error)
 
 	// (PUT /options)
 	PutOptions(ctx context.Context, request PutOptionsRequestObject) (PutOptionsResponseObject, error)
@@ -2177,6 +2271,39 @@ func (sh *strictHandler) GetOptions(ctx *gin.Context) {
 		ctx.Status(http.StatusInternalServerError)
 	} else if validResponse, ok := response.(GetOptionsResponseObject); ok {
 		if err := validResponse.VisitGetOptionsResponse(ctx.Writer); err != nil {
+			ctx.Error(err)
+		}
+	} else if response != nil {
+		ctx.Error(fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// PostOptions operation middleware
+func (sh *strictHandler) PostOptions(ctx *gin.Context) {
+	var request PostOptionsRequestObject
+
+	var body PostOptionsJSONRequestBody
+	if err := ctx.ShouldBindJSON(&body); err != nil {
+		ctx.Status(http.StatusBadRequest)
+		ctx.Error(err)
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx *gin.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.PostOptions(ctx, request.(PostOptionsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PostOptions")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		ctx.Error(err)
+		ctx.Status(http.StatusInternalServerError)
+	} else if validResponse, ok := response.(PostOptionsResponseObject); ok {
+		if err := validResponse.VisitPostOptionsResponse(ctx.Writer); err != nil {
 			ctx.Error(err)
 		}
 	} else if response != nil {
