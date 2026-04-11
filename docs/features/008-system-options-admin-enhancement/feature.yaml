@@ -1,0 +1,10 @@
+id: 008
+slug: system-options-admin-enhancement
+title: 系统配置后台增强
+type: feature
+status: done
+branch: codex/008-system-options-admin-enhancement
+owner: Codex
+created_at: "2026-04-11"
+updated_at: "2026-04-11"
+current_gate: done

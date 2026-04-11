@@ -38,6 +38,8 @@ CREATE TABLE IF NOT EXISTS sys_options (
   option_value TEXT NOT NULL,
   description VARCHAR(255) NOT NULL DEFAULT '',
   is_public TINYINT(1) NOT NULL DEFAULT 0,
+  type VARCHAR(32) NOT NULL DEFAULT 'string',
+  status VARCHAR(32) NOT NULL DEFAULT 'online',
   utime DATETIME NOT NULL DEFAULT NOW() ON UPDATE NOW() COMMENT '更新时间',
   ctime DATETIME NOT NULL DEFAULT NOW() COMMENT '创建时间'
 );
@@ -92,17 +94,17 @@ CREATE TABLE IF NOT EXISTS sys_files (
 );
 
 INSERT INTO sys_schema_info (schema_version, initialized_at, utime, ctime)
-SELECT 2, NOW(), NOW(), NOW()
+SELECT 3, NOW(), NOW(), NOW()
 WHERE NOT EXISTS (SELECT 1 FROM sys_schema_info);
 
-INSERT INTO sys_options (id, option_key, option_value, description, is_public, utime, ctime)
-SELECT 'notice', 'notice', '欢迎使用 gin-template', '系统公告', 1, NOW(), NOW()
+INSERT INTO sys_options (id, option_key, option_value, description, is_public, type, status, utime, ctime)
+SELECT 'notice', 'notice', '欢迎使用 gin-template', '系统公告', 1, 'string', 'online', NOW(), NOW()
 WHERE NOT EXISTS (SELECT 1 FROM sys_options WHERE option_key = 'notice');
 
-INSERT INTO sys_options (id, option_key, option_value, description, is_public, utime, ctime)
-SELECT 'about', 'about', 'Gin + React 同构脚手架', '关于信息', 1, NOW(), NOW()
+INSERT INTO sys_options (id, option_key, option_value, description, is_public, type, status, utime, ctime)
+SELECT 'about', 'about', 'Gin + React 同构脚手架', '关于信息', 1, 'string', 'online', NOW(), NOW()
 WHERE NOT EXISTS (SELECT 1 FROM sys_options WHERE option_key = 'about');
 
-INSERT INTO sys_options (id, option_key, option_value, description, is_public, utime, ctime)
-SELECT 'pprof_url', 'pprof_url', '/debug/pprof/', 'pprof 监控地址', 0, NOW(), NOW()
+INSERT INTO sys_options (id, option_key, option_value, description, is_public, type, status, utime, ctime)
+SELECT 'pprof_url', 'pprof_url', '/debug/pprof/', 'pprof 监控地址', 0, 'string', 'online', NOW(), NOW()
 WHERE NOT EXISTS (SELECT 1 FROM sys_options WHERE option_key = 'pprof_url');

@@ -3,6 +3,7 @@ package middleware
 import (
 	"net/http"
 	"net/url"
+	"slices"
 	"strings"
 	"time"
 
@@ -46,23 +47,9 @@ func RequireAdmin() gin.HandlerFunc {
 			return
 		}
 		currentUser, _ := CurrentUser(c)
-		if currentUser.Role != sysuserStore.RoleAdmin && currentUser.Role != sysuserStore.RoleRoot {
+		roles := []string{sysuserStore.RoleAdmin, sysuserStore.RoleRoot}
+		if !slices.Contains(roles, currentUser.Role) {
 			berr.Abort(c, berr.ErrRequireAdmin)
-			return
-		}
-		c.Next()
-	}
-}
-
-func RequireRoot() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		if err := authenticate(c, true); err != nil {
-			berr.Abort(c, berr.ErrRequireLogin)
-			return
-		}
-		currentUser, _ := CurrentUser(c)
-		if currentUser.Role != sysuserStore.RoleRoot {
-			berr.Abort(c, berr.ErrRequireRoot)
 			return
 		}
 		c.Next()

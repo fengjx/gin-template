@@ -4,7 +4,6 @@ import (
 	"errors"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 
 	"gin-template/internal/app/berr"
 	"gin-template/internal/app/config"
@@ -27,7 +26,8 @@ func registerRoutes(group *gin.RouterGroup) {
 
 	optionGroup := group.Group("/options")
 	optionGroup.GET("", middleware.RequireAdmin(), getOptions)
-	optionGroup.PUT("", middleware.RequireRoot(), updateOption)
+	optionGroup.POST("", middleware.RequireAdmin(), createOption)
+	optionGroup.PUT("", middleware.RequireAdmin(), updateOption)
 }
 
 func status(c *gin.Context) {
@@ -70,8 +70,39 @@ func getOptions(c *gin.Context) {
 	appHTTP.OK(c, itemsToPayload(items))
 }
 
+func createOption(c *gin.Context) {
+	var req optionWriteRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		appHTTP.Abort(c, berr.ErrInvalidRequest)
+		return
+	}
+	item, err := appService.CreateOption(c.Request.Context(), appService.CreateOptionRequest{
+		Key:         req.Key,
+		Value:       req.Value,
+		Description: req.Description,
+		IsPublic:    req.IsPublic,
+		Type:        req.Type,
+		Status:      req.Status,
+	})
+	if err != nil {
+		switch {
+		case errors.Is(err, appService.ErrOptionAlreadyExists):
+			appHTTP.Abort(c, berr.ErrOptionAlreadyExists.WithError(err))
+		case errors.Is(err, appService.ErrInvalidOptionKey),
+			errors.Is(err, appService.ErrInvalidOptionType),
+			errors.Is(err, appService.ErrInvalidOptionStatus),
+			errors.Is(err, appService.ErrInvalidOptionJSON):
+			appHTTP.Abort(c, berr.ErrInvalidRequest.WithDetail(err.Error()))
+		default:
+			appHTTP.Abort(c, berr.ErrCreateOptionFailed.WithError(err))
+		}
+		return
+	}
+	appHTTP.OK(c, toOptionPayload(item))
+}
+
 func updateOption(c *gin.Context) {
-	var req updateOptionRequest
+	var req optionWriteRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		appHTTP.Abort(c, berr.ErrInvalidRequest)
 		return
@@ -80,13 +111,21 @@ func updateOption(c *gin.Context) {
 		Value:       req.Value,
 		Description: req.Description,
 		IsPublic:    req.IsPublic,
+		Type:        req.Type,
+		Status:      req.Status,
 	})
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		switch {
+		case errors.Is(err, appService.ErrOptionNotFound):
 			appHTTP.Abort(c, berr.ErrOptionNotFound)
-			return
+		case errors.Is(err, appService.ErrInvalidOptionKey),
+			errors.Is(err, appService.ErrInvalidOptionType),
+			errors.Is(err, appService.ErrInvalidOptionStatus),
+			errors.Is(err, appService.ErrInvalidOptionJSON):
+			appHTTP.Abort(c, berr.ErrInvalidRequest.WithDetail(err.Error()))
+		default:
+			appHTTP.Abort(c, berr.ErrUpdateOptionFailed.WithError(err))
 		}
-		appHTTP.Abort(c, berr.ErrUpdateOptionFailed.WithError(err))
 		return
 	}
 	appHTTP.OK(c, toOptionPayload(item))

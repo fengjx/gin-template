@@ -40,8 +40,6 @@ var (
 	ErrFrontendAssetUnavailable = New(http.StatusInternalServerError, StatusFrontendAssetUnavailable, "前端资源不可用")
 )
 
-
-
 const (
 	// Auth 业务状态码：200000-209999。
 	StatusAuthBase                           = 200000
@@ -139,7 +137,6 @@ const (
 	StatusDeleteFileFailed       = 220010
 )
 
-
 var (
 	// File 业务错误定义。
 	ErrMissingUploadFile      = New(http.StatusBadRequest, StatusMissingUploadFile, "缺少上传文件")
@@ -154,7 +151,6 @@ var (
 	ErrDeleteFileFailed       = New(http.StatusInternalServerError, StatusDeleteFileFailed, "删除文件失败")
 )
 
-
 const (
 	// Option 业务状态码：230000-239999。
 	StatusOptionBase          = 230000
@@ -164,8 +160,9 @@ const (
 	StatusGetOptionsFailed    = 230004
 	StatusUpdateOptionFailed  = 230005
 	StatusPprofURLUnavailable = 230006
+	StatusCreateOptionFailed  = 230007
+	StatusOptionAlreadyExists = 230008
 )
-
 
 var (
 	// Option 业务错误定义。
@@ -175,4 +172,6 @@ var (
 	ErrGetOptionsFailed    = New(http.StatusInternalServerError, StatusGetOptionsFailed, "获取配置失败")
 	ErrUpdateOptionFailed  = New(http.StatusInternalServerError, StatusUpdateOptionFailed, "更新配置失败")
 	ErrPprofURLUnavailable = New(http.StatusNotFound, StatusPprofURLUnavailable, "Pprof 地址不可用")
+	ErrCreateOptionFailed  = New(http.StatusInternalServerError, StatusCreateOptionFailed, "创建配置失败")
+	ErrOptionAlreadyExists = New(http.StatusConflict, StatusOptionAlreadyExists, "配置项已存在")
 )

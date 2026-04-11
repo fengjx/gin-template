@@ -40,6 +40,8 @@ func TestGetOptionStringAndJSON(t *testing.T) {
 		OptionValue: `{"name":"gin-template","enable":true}`,
 		Description: "站点配置",
 		IsPublic:    false,
+		Type:        sysoptionStore.TypeJSON,
+		Status:      sysoptionStore.StatusOnline,
 	}); err != nil {
 		t.Fatalf("create option: %v", err)
 	}
@@ -61,8 +63,8 @@ func TestGetOptionStringAndJSON(t *testing.T) {
 	}
 
 	_, err = GetOptionString(context.Background(), "missing_key")
-	if !errors.Is(err, errOptionNotFound) {
-		t.Fatalf("expected errOptionNotFound, got %v", err)
+	if !errors.Is(err, ErrOptionNotFound) {
+		t.Fatalf("expected ErrOptionNotFound, got %v", err)
 	}
 }
 
@@ -87,6 +89,8 @@ func TestUpdateOptionRefreshesCacheImmediately(t *testing.T) {
 		Value:       "新的关于信息",
 		Description: "关于信息",
 		IsPublic:    true,
+		Type:        sysoptionStore.TypeString,
+		Status:      sysoptionStore.StatusOnline,
 	})
 	if err != nil {
 		t.Fatalf("update option: %v", err)
@@ -111,7 +115,7 @@ func TestOptionAutoRefresh(t *testing.T) {
 	var (
 		mu    sync.RWMutex
 		items = []sysoptionStore.Model{
-			{OptionKey: "notice", OptionValue: "old"},
+			{OptionKey: "notice", OptionValue: "old", Status: sysoptionStore.StatusOnline},
 		}
 	)
 
@@ -138,7 +142,7 @@ func TestOptionAutoRefresh(t *testing.T) {
 
 	mu.Lock()
 	items = []sysoptionStore.Model{
-		{OptionKey: "notice", OptionValue: "new"},
+		{OptionKey: "notice", OptionValue: "new", Status: sysoptionStore.StatusOnline},
 	}
 	mu.Unlock()
 
@@ -171,5 +175,98 @@ func TestNewOptionDoesNotPreloadConfig(t *testing.T) {
 	}
 	if got := config.Get().Server.Port; got != 4200 {
 		t.Fatalf("expected port 4200 after option service construction, got %d", got)
+	}
+}
+
+func TestCreateOptionRefreshesCacheImmediately(t *testing.T) {
+	ResetOptionForTest()
+	db.ResetForTest()
+	config.ResetForTest()
+	appEnv.ResetForTest()
+
+	t.Setenv("APP_DATABASE_SQLITE_PATH", filepath.Join(t.TempDir(), "option-create.db"))
+	if err := config.Load(); err != nil {
+		t.Fatalf("load config: %v", err)
+	}
+
+	_ = db.Get()
+
+	item, err := CreateOption(context.Background(), CreateOptionRequest{
+		Key:         "site_name",
+		Value:       "Gin Template",
+		Description: "站点名称",
+		IsPublic:    true,
+		Type:        sysoptionStore.TypeString,
+		Status:      sysoptionStore.StatusOnline,
+	})
+	if err != nil {
+		t.Fatalf("create option: %v", err)
+	}
+	if item.OptionKey != "site_name" {
+		t.Fatalf("expected created key site_name, got %q", item.OptionKey)
+	}
+
+	value, err := GetOptionString(context.Background(), "site_name")
+	if err != nil {
+		t.Fatalf("get option after create: %v", err)
+	}
+	if value != "Gin Template" {
+		t.Fatalf("expected refreshed cache value, got %q", value)
+	}
+}
+
+func TestUpdateOptionRejectsInvalidJSON(t *testing.T) {
+	ResetOptionForTest()
+	db.ResetForTest()
+	config.ResetForTest()
+	appEnv.ResetForTest()
+
+	t.Setenv("APP_DATABASE_SQLITE_PATH", filepath.Join(t.TempDir(), "option-invalid-json.db"))
+	if err := config.Load(); err != nil {
+		t.Fatalf("load config: %v", err)
+	}
+
+	_ = db.Get()
+
+	_, err := UpdateOption(context.Background(), "about", UpdateOptionRequest{
+		Value:       "{invalid",
+		Description: "关于信息",
+		IsPublic:    true,
+		Type:        sysoptionStore.TypeJSON,
+		Status:      sysoptionStore.StatusOnline,
+	})
+	if !errors.Is(err, ErrInvalidOptionJSON) {
+		t.Fatalf("expected ErrInvalidOptionJSON, got %v", err)
+	}
+}
+
+func TestGetOptionStringReturnsNotFoundForOfflineOption(t *testing.T) {
+	ResetOptionForTest()
+	db.ResetForTest()
+	config.ResetForTest()
+	appEnv.ResetForTest()
+
+	t.Setenv("APP_DATABASE_SQLITE_PATH", filepath.Join(t.TempDir(), "option-offline.db"))
+	if err := config.Load(); err != nil {
+		t.Fatalf("load config: %v", err)
+	}
+
+	_ = db.Get()
+
+	if err := sysoptionStore.Create(context.Background(), &sysoptionStore.Model{
+		ID:          "offline_notice",
+		OptionKey:   "offline_notice",
+		OptionValue: "offline",
+		Description: "下线配置",
+		IsPublic:    true,
+		Type:        sysoptionStore.TypeString,
+		Status:      sysoptionStore.StatusOffline,
+	}); err != nil {
+		t.Fatalf("create offline option: %v", err)
+	}
+
+	_, err := GetOptionString(context.Background(), "offline_notice")
+	if !errors.Is(err, ErrOptionNotFound) {
+		t.Fatalf("expected ErrOptionNotFound for offline option, got %v", err)
 	}
 }

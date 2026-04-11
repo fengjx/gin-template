@@ -38,6 +38,8 @@ CREATE TABLE IF NOT EXISTS sys_options (
   option_value TEXT NOT NULL,
   description TEXT NOT NULL DEFAULT '',
   is_public INTEGER NOT NULL DEFAULT 0,
+  type TEXT NOT NULL DEFAULT 'string',
+  status TEXT NOT NULL DEFAULT 'online',
   utime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   ctime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -172,12 +174,12 @@ BEGIN
 END;
 
 INSERT INTO sys_schema_info (schema_version, initialized_at, utime, ctime)
-SELECT 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+SELECT 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
 WHERE NOT EXISTS (SELECT 1 FROM sys_schema_info);
 
-INSERT INTO sys_options (id, option_key, option_value, description, is_public, utime, ctime)
+INSERT INTO sys_options (id, option_key, option_value, description, is_public, type, status, utime, ctime)
 VALUES
-  ('notice', 'notice', '欢迎使用 gin-template', '系统公告', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('about', 'about', 'Gin + React 同构脚手架', '关于信息', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('pprof_url', 'pprof_url', '/debug/pprof/', 'pprof 监控地址', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+  ('notice', 'notice', '欢迎使用 gin-template', '系统公告', 1, 'string', 'online', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('about', 'about', 'Gin + React 同构脚手架', '关于信息', 1, 'string', 'online', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('pprof_url', 'pprof_url', '/debug/pprof/', 'pprof 监控地址', 0, 'string', 'online', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
 ON CONFLICT(option_key) DO NOTHING;

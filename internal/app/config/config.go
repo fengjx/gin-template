@@ -255,7 +255,7 @@ func setDefaults(target *viper.Viper) {
 	target.SetDefault("database.driver", "sqlite")
 	target.SetDefault("database.dsn", "")
 	target.SetDefault("database.sqlite_path", "runtime/data/app.db")
-	target.SetDefault("database.schema_version", 2)
+	target.SetDefault("database.schema_version", 3)
 	target.SetDefault("trace.header_name", "X-Trace-Id")
 	target.SetDefault("auth.issuer", "gin-template")
 	target.SetDefault("auth.access_token_ttl_minutes", 30)

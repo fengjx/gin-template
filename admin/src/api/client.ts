@@ -6,6 +6,7 @@ import type {
   FileListResponse,
   MessageResponse,
   OptionItem,
+  OptionWriteRequest,
   Problem,
   User,
   UserCreateRequest,
@@ -287,12 +288,13 @@ export const api = {
       method: 'DELETE',
     }),
   listOptions: () => request<OptionItem[]>('/api/v1/options'),
-  updateOption: (payload: {
-    key: string;
-    value: string;
-    description?: string;
-    is_public?: boolean;
-  }) =>
+  createOption: (payload: OptionWriteRequest) =>
+    request<OptionItem>('/api/v1/options', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    }),
+  updateOption: (payload: OptionWriteRequest) =>
     request<OptionItem>('/api/v1/options', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },

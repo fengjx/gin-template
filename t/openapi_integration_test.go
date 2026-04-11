@@ -751,20 +751,51 @@ func optionOperationCases() []operationCase {
 				if !containsOption(resp.Data, "about") || !containsOption(resp.Data, "notice") {
 					t.Fatal("expected about and notice options to exist")
 				}
+				about := findOption(resp.Data, "about")
+				if about == nil {
+					t.Fatal("expected to find about option")
+				}
+				if about.Type != "string" || about.Status != "online" {
+					t.Fatalf("expected about option to expose type/status, got %#v", about)
+				}
 			},
 		},
 		{
-			name:      "PUT /options updates option for root",
-			operation: "PUT /options",
+			name:      "POST /options creates option for admin",
+			operation: "POST /options",
 			run: func(t *testing.T, h *testkit.Harness) {
-				root := h.LoginRoot(t)
+				admin := h.LoginAdmin(t)
 
 				var resp appHTTP.OptionEnvelope
-				root.JSON(t, http.MethodPut, "/options", map[string]any{
+				admin.JSON(t, http.MethodPost, "/options", map[string]any{
+					"key":         "site_profile",
+					"value":       "{\"name\":\"gin-template\"}",
+					"description": "站点配置",
+					"is_public":   true,
+					"type":        "json",
+					"status":      "online",
+				}, http.StatusOK, &resp)
+
+				assertOKEnvelope(t, resp.Status, resp.Msg)
+				if resp.Data.Type != "json" || resp.Data.Status != "online" {
+					t.Fatalf("unexpected created option metadata: %#v", resp.Data)
+				}
+			},
+		},
+		{
+			name:      "PUT /options updates option for admin",
+			operation: "PUT /options",
+			run: func(t *testing.T, h *testkit.Harness) {
+				admin := h.LoginAdmin(t)
+
+				var resp appHTTP.OptionEnvelope
+				admin.JSON(t, http.MethodPut, "/options", map[string]any{
 					"key":         "about",
 					"value":       "新的关于信息",
 					"description": "关于信息",
 					"is_public":   true,
+					"type":        "string",
+					"status":      "online",
 				}, http.StatusOK, &resp)
 
 				assertOKEnvelope(t, resp.Status, resp.Msg)
@@ -804,32 +835,91 @@ func optionExtraCases() []extraCase {
 			},
 		},
 		{
-			name: "PUT /options returns 403 for admin without root role",
+			name: "POST /options returns 409 when option already exists",
 			run: func(t *testing.T, h *testkit.Harness) {
 				admin := h.LoginAdmin(t)
 
 				var problem appHTTP.Problem
-				admin.JSON(t, http.MethodPut, "/options", map[string]any{
+				admin.JSON(t, http.MethodPost, "/options", map[string]any{
 					"key":         "about",
-					"value":       "forbidden",
-					"description": "forbidden",
+					"value":       "duplicate",
+					"description": "duplicate",
 					"is_public":   true,
-				}, http.StatusForbidden, &problem)
+					"type":        "string",
+					"status":      "online",
+				}, http.StatusConflict, &problem)
+				assertProblemEnvelope(t, problem)
+			},
+		},
+		{
+			name: "POST /options returns 400 when json is invalid",
+			run: func(t *testing.T, h *testkit.Harness) {
+				admin := h.LoginAdmin(t)
+
+				var problem appHTTP.Problem
+				admin.JSON(t, http.MethodPost, "/options", map[string]any{
+					"key":         "broken_json",
+					"value":       "{invalid",
+					"description": "broken",
+					"is_public":   false,
+					"type":        "json",
+					"status":      "online",
+				}, http.StatusBadRequest, &problem)
 				assertProblemEnvelope(t, problem)
 			},
 		},
 		{
 			name: "PUT /options returns 404 when option is missing",
 			run: func(t *testing.T, h *testkit.Harness) {
-				root := h.LoginRoot(t)
+				admin := h.LoginAdmin(t)
 
 				var problem appHTTP.Problem
-				root.JSON(t, http.MethodPut, "/options", map[string]any{
+				admin.JSON(t, http.MethodPut, "/options", map[string]any{
 					"key":         "missing_option",
 					"value":       "missing",
 					"description": "missing",
 					"is_public":   false,
+					"type":        "string",
+					"status":      "online",
 				}, http.StatusNotFound, &problem)
+				assertProblemEnvelope(t, problem)
+			},
+		},
+		{
+			name: "PUT /options returns 400 when type is invalid",
+			run: func(t *testing.T, h *testkit.Harness) {
+				admin := h.LoginAdmin(t)
+
+				var problem appHTTP.Problem
+				admin.JSON(t, http.MethodPut, "/options", map[string]any{
+					"key":         "about",
+					"value":       "bad type",
+					"description": "bad type",
+					"is_public":   true,
+					"type":        "yaml",
+					"status":      "online",
+				}, http.StatusBadRequest, &problem)
+				assertProblemEnvelope(t, problem)
+			},
+		},
+		{
+			name: "PUT /options offline value is hidden from public reader",
+			run: func(t *testing.T, h *testkit.Harness) {
+				admin := h.LoginAdmin(t)
+
+				var updateResp appHTTP.OptionEnvelope
+				admin.JSON(t, http.MethodPut, "/options", map[string]any{
+					"key":         "about",
+					"value":       "offline about",
+					"description": "offline about",
+					"is_public":   true,
+					"type":        "string",
+					"status":      "offline",
+				}, http.StatusOK, &updateResp)
+				assertOKEnvelope(t, updateResp.Status, updateResp.Msg)
+
+				var problem appHTTP.Problem
+				h.NewSession(t).JSON(t, http.MethodGet, "/system/about", nil, http.StatusNotFound, &problem)
 				assertProblemEnvelope(t, problem)
 			},
 		},
@@ -978,12 +1068,16 @@ func containsFile(items []appHTTP.File, originalName string) bool {
 }
 
 func containsOption(items []appHTTP.Option, key string) bool {
-	for _, item := range items {
-		if item.OptionKey == key {
-			return true
+	return findOption(items, key) != nil
+}
+
+func findOption(items []appHTTP.Option, key string) *appHTTP.Option {
+	for i := range items {
+		if items[i].OptionKey == key {
+			return &items[i]
 		}
 	}
-	return false
+	return nil
 }
 
 func findRepoRoot(t *testing.T) string {
