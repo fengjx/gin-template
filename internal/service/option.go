@@ -138,7 +138,6 @@ func (s *option) Create(ctx context.Context, req CreateOptionRequest) (*sysoptio
 	}
 
 	item := &sysoptionStore.Model{
-		ID:          key,
 		OptionKey:   key,
 		OptionValue: req.Value,
 		Description: req.Description,

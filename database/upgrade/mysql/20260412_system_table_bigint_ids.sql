@@ -1,23 +1,9 @@
-CREATE TABLE IF NOT EXISTS sys_schema_info (
-  id BIGINT PRIMARY KEY AUTO_INCREMENT,
-  schema_version BIGINT NOT NULL,
-  initialized_at DATETIME NOT NULL DEFAULT NOW(),
-  utime DATETIME NOT NULL DEFAULT NOW() ON UPDATE NOW() COMMENT '更新时间',
-  ctime DATETIME NOT NULL DEFAULT NOW() COMMENT '创建时间'
-);
-
-CREATE TABLE IF NOT EXISTS sys_users (
-  uid BIGINT PRIMARY KEY AUTO_INCREMENT,
-  username VARCHAR(64) NOT NULL UNIQUE,
-  email VARCHAR(128) NOT NULL UNIQUE,
-  password_hash VARCHAR(255) NOT NULL,
-  role VARCHAR(32) NOT NULL,
-  status VARCHAR(32) NOT NULL,
-  display_name VARCHAR(128) NOT NULL,
-  email_verified TINYINT(1) NOT NULL DEFAULT 0,
-  utime DATETIME NOT NULL DEFAULT NOW() ON UPDATE NOW() COMMENT '更新时间',
-  ctime DATETIME NOT NULL DEFAULT NOW() COMMENT '创建时间'
-);
+DROP TABLE IF EXISTS sys_refresh_tokens;
+DROP TABLE IF EXISTS sys_options;
+DROP TABLE IF EXISTS sys_oauth_bindings;
+DROP TABLE IF EXISTS sys_email_verifications;
+DROP TABLE IF EXISTS sys_password_resets;
+DROP TABLE IF EXISTS sys_files;
 
 CREATE TABLE IF NOT EXISTS sys_refresh_tokens (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -94,10 +80,6 @@ CREATE TABLE IF NOT EXISTS sys_files (
   CONSTRAINT fk_sys_files_user FOREIGN KEY (uid) REFERENCES sys_users(uid)
 );
 
-INSERT INTO sys_schema_info (schema_version, initialized_at, utime, ctime)
-SELECT 4, NOW(), NOW(), NOW()
-WHERE NOT EXISTS (SELECT 1 FROM sys_schema_info);
-
 INSERT INTO sys_options (option_key, option_value, description, is_public, type, status, utime, ctime)
 SELECT 'notice', '欢迎使用 gin-template', '系统公告', 1, 'string', 'online', NOW(), NOW()
 WHERE NOT EXISTS (SELECT 1 FROM sys_options WHERE option_key = 'notice');
@@ -109,3 +91,8 @@ WHERE NOT EXISTS (SELECT 1 FROM sys_options WHERE option_key = 'about');
 INSERT INTO sys_options (option_key, option_value, description, is_public, type, status, utime, ctime)
 SELECT 'pprof_url', '/debug/pprof/', 'pprof 监控地址', 0, 'string', 'online', NOW(), NOW()
 WHERE NOT EXISTS (SELECT 1 FROM sys_options WHERE option_key = 'pprof_url');
+
+UPDATE sys_schema_info
+SET schema_version = 4,
+    utime = NOW()
+WHERE schema_version < 4;

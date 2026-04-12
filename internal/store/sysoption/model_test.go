@@ -23,7 +23,6 @@ func TestCreateAndQueryOptionWithTypeAndStatus(t *testing.T) {
 	_ = db.Get()
 
 	item := &Model{
-		ID:          "site_profile",
 		OptionKey:   "site_profile",
 		OptionValue: `{"name":"gin-template"}`,
 		Description: "站点配置",
@@ -68,7 +67,6 @@ func TestGetPublicFiltersOfflineOptions(t *testing.T) {
 	_ = db.Get()
 
 	if err := Create(context.Background(), &Model{
-		ID:          "public_offline",
 		OptionKey:   "public_offline",
 		OptionValue: "offline",
 		Description: "下线公开配置",

@@ -6,13 +6,12 @@ import (
 
 	"gin-template/internal/app/db"
 	"gin-template/pkg/errs"
-	"github.com/google/uuid"
 )
 
 const TableName = "sys_refresh_tokens"
 
 type Model struct {
-	ID        string     `gorm:"column:id;primaryKey" json:"id"`
+	ID        int64      `gorm:"column:id;primaryKey;autoIncrement" json:"id"`
 	UID       int64      `gorm:"column:uid" json:"uid"`
 	TokenHash string     `gorm:"column:token_hash" json:"token_hash"`
 	ExpiresAt time.Time  `gorm:"column:expires_at" json:"expires_at"`
@@ -29,7 +28,6 @@ func (Model) TableName() string {
 
 func New(uid int64, tokenHash, userAgent, clientIP string, expiresAt time.Time) *Model {
 	return &Model{
-		ID:        uuid.NewString(),
 		UID:       uid,
 		TokenHash: tokenHash,
 		ExpiresAt: expiresAt,
@@ -54,7 +52,7 @@ func ByTokenHash(ctx context.Context, tokenHash string) (*Model, error) {
 	return &item, nil
 }
 
-func Revoke(ctx context.Context, id string) error {
+func Revoke(ctx context.Context, id int64) error {
 	now := time.Now()
 	if err := db.Get().WithContext(ctx).Table(TableName).Where("id = ?", id).Updates(map[string]any{
 		"revoked_at": &now,

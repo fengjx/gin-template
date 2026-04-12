@@ -50,7 +50,12 @@ func searchFiles(c *gin.Context) {
 }
 
 func getFile(c *gin.Context) {
-	item, err := sysfileStore.ByID(c.Request.Context(), c.Param("id"))
+	id, err := parseFileID(c.Param("id"))
+	if err != nil {
+		appHTTP.Abort(c, berr.ErrInvalidRequest.WithDetail(err.Error()))
+		return
+	}
+	item, err := sysfileStore.ByID(c.Request.Context(), id)
 	if err != nil {
 		appHTTP.Abort(c, berr.ErrFileNotFound.WithError(err))
 		return
@@ -89,7 +94,12 @@ func uploadFile(c *gin.Context) {
 }
 
 func deleteFile(c *gin.Context) {
-	item, err := sysfileStore.ByID(c.Request.Context(), c.Param("id"))
+	id, err := parseFileID(c.Param("id"))
+	if err != nil {
+		appHTTP.Abort(c, berr.ErrInvalidRequest.WithDetail(err.Error()))
+		return
+	}
+	item, err := sysfileStore.ByID(c.Request.Context(), id)
 	if err != nil {
 		appHTTP.Abort(c, berr.ErrFileNotFound.WithError(err))
 		return
@@ -99,5 +109,5 @@ func deleteFile(c *gin.Context) {
 		appHTTP.Abort(c, berr.ErrDeleteFileFailed.WithError(err))
 		return
 	}
-	appHTTP.OK(c, messageResponse{Message: fmt.Sprintf("文件 %s 已删除", item.ID)})
+	appHTTP.OK(c, messageResponse{Message: fmt.Sprintf("文件 %d 已删除", item.ID)})
 }

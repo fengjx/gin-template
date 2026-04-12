@@ -1,0 +1,10 @@
+id: 009
+slug: system-table-bigint-id-refactor
+title: 系统表 bigint 自增主键改造
+type: refactor
+status: done
+branch: codex/009-system-table-bigint-id-refactor
+owner: Codex
+created_at: "2026-04-12"
+updated_at: "2026-04-12"
+current_gate: done

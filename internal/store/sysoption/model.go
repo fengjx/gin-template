@@ -20,7 +20,7 @@ const (
 )
 
 type Model struct {
-	ID          string    `gorm:"column:id;primaryKey" json:"id"`
+	ID          int64     `gorm:"column:id;primaryKey;autoIncrement" json:"id"`
 	OptionKey   string    `gorm:"column:option_key" json:"option_key"`
 	OptionValue string    `gorm:"column:option_value" json:"option_value"`
 	Description string    `gorm:"column:description" json:"description"`

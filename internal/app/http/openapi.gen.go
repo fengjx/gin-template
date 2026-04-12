@@ -76,7 +76,7 @@ type File struct {
 
 	// Ctime Unix 秒级时间戳
 	Ctime        int64  `json:"ctime"`
-	Id           string `json:"id"`
+	Id           int64  `json:"id"`
 	OriginalName string `json:"original_name"`
 	Path         string `json:"path"`
 	Size         int    `json:"size"`
@@ -137,7 +137,7 @@ type Option struct {
 	// Ctime Unix 秒级时间戳
 	Ctime       int64        `json:"ctime"`
 	Description string       `json:"description"`
-	Id          string       `json:"id"`
+	Id          int64        `json:"id"`
 	IsPublic    bool         `json:"is_public"`
 	OptionKey   string       `json:"option_key"`
 	OptionValue string       `json:"option_value"`
@@ -401,10 +401,10 @@ type ServerInterface interface {
 	PostFilesUpload(c *gin.Context)
 
 	// (DELETE /files/{id})
-	DeleteFilesId(c *gin.Context, id string)
+	DeleteFilesId(c *gin.Context, id int64)
 
 	// (GET /files/{id})
-	GetFilesId(c *gin.Context, id string)
+	GetFilesId(c *gin.Context, id int64)
 
 	// (GET /options)
 	GetOptions(c *gin.Context)
@@ -628,7 +628,7 @@ func (siw *ServerInterfaceWrapper) DeleteFilesId(c *gin.Context) {
 	var err error
 
 	// ------------- Path parameter "id" -------------
-	var id string
+	var id int64
 
 	err = runtime.BindStyledParameterWithOptions("simple", "id", c.Param("id"), &id, runtime.BindStyledParameterOptions{Explode: false, Required: true})
 	if err != nil {
@@ -654,7 +654,7 @@ func (siw *ServerInterfaceWrapper) GetFilesId(c *gin.Context) {
 	var err error
 
 	// ------------- Path parameter "id" -------------
-	var id string
+	var id int64
 
 	err = runtime.BindStyledParameterWithOptions("simple", "id", c.Param("id"), &id, runtime.BindStyledParameterOptions{Explode: false, Required: true})
 	if err != nil {
@@ -1319,7 +1319,7 @@ func (response PostFilesUploaddefaultJSONResponse) VisitPostFilesUploadResponse(
 }
 
 type DeleteFilesIdRequestObject struct {
-	Id string `json:"id"`
+	Id int64 `json:"id"`
 }
 
 type DeleteFilesIdResponseObject interface {
@@ -1348,7 +1348,7 @@ func (response DeleteFilesIddefaultJSONResponse) VisitDeleteFilesIdResponse(w ht
 }
 
 type GetFilesIdRequestObject struct {
-	Id string `json:"id"`
+	Id int64 `json:"id"`
 }
 
 type GetFilesIdResponseObject interface {
@@ -2200,7 +2200,7 @@ func (sh *strictHandler) PostFilesUpload(ctx *gin.Context) {
 }
 
 // DeleteFilesId operation middleware
-func (sh *strictHandler) DeleteFilesId(ctx *gin.Context, id string) {
+func (sh *strictHandler) DeleteFilesId(ctx *gin.Context, id int64) {
 	var request DeleteFilesIdRequestObject
 
 	request.Id = id
@@ -2227,7 +2227,7 @@ func (sh *strictHandler) DeleteFilesId(ctx *gin.Context, id string) {
 }
 
 // GetFilesId operation middleware
-func (sh *strictHandler) GetFilesId(ctx *gin.Context, id string) {
+func (sh *strictHandler) GetFilesId(ctx *gin.Context, id int64) {
 	var request GetFilesIdRequestObject
 
 	request.Id = id

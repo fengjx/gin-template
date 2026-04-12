@@ -647,7 +647,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    id: string;
+                    id: number;
                 };
                 cookie?: never;
             };
@@ -672,7 +672,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    id: string;
+                    id: number;
                 };
                 cookie?: never;
             };
@@ -1033,7 +1033,8 @@ export interface components {
             data: components["schemas"]["UserListResponse"];
         };
         File: {
-            id: string;
+            /** Format: int64 */
+            id: number;
             /** Format: int64 */
             uid: number;
             original_name: string;
@@ -1063,7 +1064,8 @@ export interface components {
             data: components["schemas"]["FileListResponse"];
         };
         Option: {
-            id: string;
+            /** Format: int64 */
+            id: number;
             option_key: string;
             option_value: string;
             description: string;
