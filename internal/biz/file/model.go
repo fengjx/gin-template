@@ -20,7 +20,7 @@ type listFilesResponse struct {
 }
 
 type filePayload struct {
-	ID           string `json:"id"`
+	ID           int64  `json:"id"`
 	UID          int64  `json:"uid"`
 	OriginalName string `json:"original_name"`
 	StorageName  string `json:"storage_name"`

@@ -275,7 +275,7 @@ export function OptionsPage() {
             minWidth: '120px',
           },
         ]}
-        rowKey={(row) => row.id}
+        rowKey={(row) => String(row.id)}
         loading={options.isFetching || saveMutation.isPending}
         emptyTitle="暂无配置项"
         emptyDescription="当前环境还没有可编辑的系统配置。"

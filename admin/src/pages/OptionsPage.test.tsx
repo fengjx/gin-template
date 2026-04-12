@@ -56,7 +56,7 @@ describe('OptionsPage', () => {
   it('可以新增 string 类型配置', async () => {
     listOptionsMock.mockResolvedValue([
       {
-        id: 'about',
+        id: 1,
         option_key: 'about',
         option_value: 'Gin + React 同构脚手架',
         description: '关于信息',
@@ -68,7 +68,7 @@ describe('OptionsPage', () => {
       },
     ]);
     createOptionMock.mockResolvedValue({
-      id: 'site_name',
+      id: 2,
       option_key: 'site_name',
       option_value: 'Gin Template',
       description: '站点名称',

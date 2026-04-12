@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -632,11 +633,11 @@ func fileOperationCases() []operationCase {
 				uploaded := uploadFixtureFile(t, admin, "lookup-file.txt", []byte("lookup file body"))
 
 				var resp appHTTP.FileEnvelope
-				admin.JSON(t, http.MethodGet, "/files/"+uploaded.Id, nil, http.StatusOK, &resp)
+				admin.JSON(t, http.MethodGet, "/files/"+strconv.FormatInt(uploaded.Id, 10), nil, http.StatusOK, &resp)
 
 				assertOKEnvelope(t, resp.Status, resp.Msg)
 				if resp.Data.Id != uploaded.Id {
-					t.Fatalf("expected file id %q, got %q", uploaded.Id, resp.Data.Id)
+					t.Fatalf("expected file id %d, got %d", uploaded.Id, resp.Data.Id)
 				}
 			},
 		},
@@ -673,7 +674,7 @@ func fileOperationCases() []operationCase {
 				uploaded := uploadFixtureFile(t, admin, "delete-file.txt", []byte("delete me"))
 
 				var resp appHTTP.MessageEnvelope
-				admin.JSON(t, http.MethodDelete, "/files/"+uploaded.Id, nil, http.StatusOK, &resp)
+				admin.JSON(t, http.MethodDelete, "/files/"+strconv.FormatInt(uploaded.Id, 10), nil, http.StatusOK, &resp)
 
 				assertOKEnvelope(t, resp.Status, resp.Msg)
 				if resp.Data.Message == "" {
@@ -726,7 +727,7 @@ func fileExtraCases() []extraCase {
 				admin := h.LoginAdmin(t)
 
 				var problem appHTTP.Problem
-				admin.JSON(t, http.MethodGet, "/files/not-found", nil, http.StatusNotFound, &problem)
+				admin.JSON(t, http.MethodGet, "/files/999999", nil, http.StatusNotFound, &problem)
 				assertProblemEnvelope(t, problem)
 			},
 		},

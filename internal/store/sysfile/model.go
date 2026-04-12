@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"gin-template/pkg/errs"
-	"github.com/google/uuid"
 
 	"gin-template/internal/app/db"
 )
@@ -14,7 +13,7 @@ import (
 const TableName = "sys_files"
 
 type Model struct {
-	ID           string    `gorm:"column:id;primaryKey" json:"id"`
+	ID           int64     `gorm:"column:id;primaryKey;autoIncrement" json:"id"`
 	UID          int64     `gorm:"column:uid" json:"uid"`
 	OriginalName string    `gorm:"column:original_name" json:"original_name"`
 	StorageName  string    `gorm:"column:storage_name" json:"storage_name"`
@@ -31,7 +30,6 @@ func (Model) TableName() string {
 
 func New(uid int64, originalName, storageName, contentType, path string, size int64) *Model {
 	return &Model{
-		ID:           uuid.NewString(),
 		UID:          uid,
 		OriginalName: originalName,
 		StorageName:  storageName,
@@ -48,7 +46,7 @@ func Create(ctx context.Context, item *Model) error {
 	return nil
 }
 
-func ByID(ctx context.Context, id string) (*Model, error) {
+func ByID(ctx context.Context, id int64) (*Model, error) {
 	var item Model
 	err := db.Get().WithContext(ctx).First(&item, "id = ?", id).Error
 	if err != nil {
@@ -74,7 +72,7 @@ func Search(ctx context.Context, keyword string, limit, offset int) ([]Model, in
 	return items, total, nil
 }
 
-func Delete(ctx context.Context, id string) error {
+func Delete(ctx context.Context, id int64) error {
 	if err := db.Get().WithContext(ctx).Delete(&Model{}, "id = ?", id).Error; err != nil {
 		return errs.Wrap(err, "删除文件记录失败")
 	}

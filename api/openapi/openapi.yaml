@@ -141,7 +141,7 @@ components:
       type: object
       required: [id, uid, original_name, storage_name, content_type, size, path, ctime, utime]
       properties:
-        id: { type: string }
+        id: { type: integer, format: int64 }
         uid: { type: integer, format: int64 }
         original_name: { type: string }
         storage_name: { type: string }
@@ -176,7 +176,7 @@ components:
       type: object
       required: [id, option_key, option_value, description, is_public, type, status, ctime, utime]
       properties:
-        id: { type: string }
+        id: { type: integer, format: int64 }
         option_key: { type: string }
         option_value: { type: string }
         description: { type: string }
@@ -523,7 +523,7 @@ paths:
         - in: path
           name: id
           required: true
-          schema: { type: string }
+          schema: { type: integer, format: int64 }
       responses:
         '200':
           description: OK
@@ -539,7 +539,7 @@ paths:
         - in: path
           name: id
           required: true
-          schema: { type: string }
+          schema: { type: integer, format: int64 }
       responses:
         '200':
           description: OK

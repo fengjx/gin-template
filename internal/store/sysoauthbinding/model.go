@@ -6,13 +6,12 @@ import (
 
 	"gin-template/internal/app/db"
 	"gin-template/pkg/errs"
-	"github.com/google/uuid"
 )
 
 const TableName = "sys_oauth_bindings"
 
 type Model struct {
-	ID               string    `gorm:"column:id;primaryKey" json:"id"`
+	ID               int64     `gorm:"column:id;primaryKey;autoIncrement" json:"id"`
 	UID              int64     `gorm:"column:uid" json:"uid"`
 	Provider         string    `gorm:"column:provider" json:"provider"`
 	ProviderUserID   string    `gorm:"column:provider_user_id" json:"provider_user_id"`
@@ -28,7 +27,6 @@ func (Model) TableName() string {
 func Upsert(ctx context.Context, provider, providerUserID, providerUsername string, uid int64) error {
 	now := time.Now()
 	item := &Model{
-		ID:               uuid.NewString(),
 		UID:              uid,
 		Provider:         provider,
 		ProviderUserID:   providerUserID,

@@ -35,7 +35,6 @@ func TestGetOptionStringAndJSON(t *testing.T) {
 	_ = db.Get()
 
 	if err := sysoptionStore.Create(context.Background(), &sysoptionStore.Model{
-		ID:          "site_profile",
 		OptionKey:   "site_profile",
 		OptionValue: `{"name":"gin-template","enable":true}`,
 		Description: "站点配置",
@@ -205,6 +204,9 @@ func TestCreateOptionRefreshesCacheImmediately(t *testing.T) {
 	if item.OptionKey != "site_name" {
 		t.Fatalf("expected created key site_name, got %q", item.OptionKey)
 	}
+	if item.ID <= 0 {
+		t.Fatalf("expected created id > 0, got %d", item.ID)
+	}
 
 	value, err := GetOptionString(context.Background(), "site_name")
 	if err != nil {
@@ -254,7 +256,6 @@ func TestGetOptionStringReturnsNotFoundForOfflineOption(t *testing.T) {
 	_ = db.Get()
 
 	if err := sysoptionStore.Create(context.Background(), &sysoptionStore.Model{
-		ID:          "offline_notice",
 		OptionKey:   "offline_notice",
 		OptionValue: "offline",
 		Description: "下线配置",

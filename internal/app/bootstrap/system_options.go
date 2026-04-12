@@ -36,7 +36,6 @@ func EnsureSystemOptions(ctx context.Context) error {
 		}
 
 		record := &sysoptionStore.Model{
-			ID:          item.Key,
 			OptionKey:   item.Key,
 			OptionValue: item.Value,
 			Description: item.Description,

@@ -7,6 +7,7 @@ import (
 	"mime/multipart"
 	"os"
 	"path/filepath"
+	"strconv"
 
 	sysfileStore "gin-template/internal/store/sysfile"
 	"gin-template/pkg/errs"
@@ -51,4 +52,12 @@ func saveUploadedFile(c *gin.Context, uid int64, formFile *multipart.FileHeader,
 	}
 
 	return item, nil
+}
+
+func parseFileID(value string) (int64, error) {
+	id, err := strconv.ParseInt(value, 10, 64)
+	if err != nil {
+		return 0, errs.Wrap(err, "解析文件 ID 失败")
+	}
+	return id, nil
 }

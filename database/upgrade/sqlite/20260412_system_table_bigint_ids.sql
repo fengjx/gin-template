@@ -1,23 +1,9 @@
-CREATE TABLE IF NOT EXISTS sys_schema_info (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  schema_version INTEGER NOT NULL,
-  initialized_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  utime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  ctime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE IF NOT EXISTS sys_users (
-  uid INTEGER PRIMARY KEY AUTOINCREMENT,
-  username TEXT NOT NULL UNIQUE,
-  email TEXT NOT NULL UNIQUE,
-  password_hash TEXT NOT NULL,
-  role TEXT NOT NULL,
-  status TEXT NOT NULL,
-  display_name TEXT NOT NULL,
-  email_verified INTEGER NOT NULL DEFAULT 0,
-  utime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  ctime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
+DROP TABLE IF EXISTS sys_refresh_tokens;
+DROP TABLE IF EXISTS sys_options;
+DROP TABLE IF EXISTS sys_oauth_bindings;
+DROP TABLE IF EXISTS sys_email_verifications;
+DROP TABLE IF EXISTS sys_password_resets;
+DROP TABLE IF EXISTS sys_files;
 
 CREATE TABLE IF NOT EXISTS sys_refresh_tokens (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -94,26 +80,6 @@ CREATE TABLE IF NOT EXISTS sys_files (
   FOREIGN KEY(uid) REFERENCES sys_users(uid)
 );
 
-CREATE TRIGGER IF NOT EXISTS trg_sys_schema_info_utime
-AFTER UPDATE ON sys_schema_info
-FOR EACH ROW
-WHEN NEW.utime = OLD.utime
-BEGIN
-  UPDATE sys_schema_info
-  SET utime = STRFTIME('%Y-%m-%d %H:%M:%f', 'now')
-  WHERE id = OLD.id;
-END;
-
-CREATE TRIGGER IF NOT EXISTS trg_sys_users_utime
-AFTER UPDATE ON sys_users
-FOR EACH ROW
-WHEN NEW.utime = OLD.utime
-BEGIN
-  UPDATE sys_users
-  SET utime = STRFTIME('%Y-%m-%d %H:%M:%f', 'now')
-  WHERE uid = OLD.uid;
-END;
-
 CREATE TRIGGER IF NOT EXISTS trg_sys_refresh_tokens_utime
 AFTER UPDATE ON sys_refresh_tokens
 FOR EACH ROW
@@ -174,13 +140,14 @@ BEGIN
   WHERE id = OLD.id;
 END;
 
-INSERT INTO sys_schema_info (schema_version, initialized_at, utime, ctime)
-SELECT 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
-WHERE NOT EXISTS (SELECT 1 FROM sys_schema_info);
-
 INSERT INTO sys_options (option_key, option_value, description, is_public, type, status, utime, ctime)
 VALUES
   ('notice', '欢迎使用 gin-template', '系统公告', 1, 'string', 'online', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('about', 'Gin + React 同构脚手架', '关于信息', 1, 'string', 'online', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('pprof_url', '/debug/pprof/', 'pprof 监控地址', 0, 'string', 'online', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
 ON CONFLICT(option_key) DO NOTHING;
+
+UPDATE sys_schema_info
+SET schema_version = 4,
+    utime = CURRENT_TIMESTAMP
+WHERE schema_version < 4;

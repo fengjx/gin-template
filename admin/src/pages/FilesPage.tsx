@@ -226,7 +226,7 @@ export function FilesPage() {
             minWidth: '130px',
           },
         ]}
-        rowKey={(row) => row.id}
+        rowKey={(row) => String(row.id)}
         loading={files.isFetching || deleteMutation.isPending || uploading}
         emptyTitle="没有找到匹配的文件"
         emptyDescription="可以尝试更换搜索关键词，或直接上传新的文件资产。"

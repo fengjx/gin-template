@@ -27,7 +27,7 @@ type optionWriteRequest struct {
 }
 
 type optionPayload struct {
-	ID          string `json:"id"`
+	ID          int64  `json:"id"`
 	OptionKey   string `json:"option_key"`
 	OptionValue string `json:"option_value"`
 	Description string `json:"description"`

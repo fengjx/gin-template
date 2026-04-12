@@ -283,7 +283,7 @@ export const api = {
     body.append('file', file);
     return request<FileItem>('/api/v1/files/upload', { method: 'POST', body });
   },
-  deleteFile: (id: string) =>
+  deleteFile: (id: number) =>
     request<MessageResponse>(`/api/v1/files/${id}`, {
       method: 'DELETE',
     }),
