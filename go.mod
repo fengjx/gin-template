@@ -8,7 +8,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/google/uuid v1.6.0
 	github.com/oapi-codegen/oapi-codegen/v2 v2.6.0
-	github.com/oapi-codegen/runtime v1.3.1
+	github.com/oapi-codegen/runtime v1.4.1
 	github.com/petermattis/goid v0.0.0-20260226131333-17d1149c6ac6
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/pflag v1.0.10
